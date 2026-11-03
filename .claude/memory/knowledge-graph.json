@@ -1,0 +1,352 @@
+{
+ "entities": [
+  {
+   "name": "BlenderAssets",
+   "entityType": "module",
+   "observations": [
+    "blender-assets/ avatars, props, FBX exports"
+   ]
+  },
+  {
+   "name": "ChildApp",
+   "entityType": "app",
+   "observations": [
+    "unity-child-app/ Magic Lens, Unity 2022.3 + Vuforia",
+    "Android 10+ tablet, >=30 FPS"
+   ]
+  },
+  {
+   "name": "F1-ARGuidance",
+   "entityType": "feature",
+   "observations": [
+    "deterministic marker state machine"
+   ]
+  },
+  {
+   "name": "F2-LowSensoryUI",
+   "entityType": "feature",
+   "observations": [
+    "pastel, one cue, no flashing, no mini-map"
+   ]
+  },
+  {
+   "name": "F3-PathTracking",
+   "entityType": "feature",
+   "observations": [
+    "auto checkpoint logs on marker found"
+   ]
+  },
+  {
+   "name": "F4-VoiceOverride",
+   "entityType": "feature",
+   "observations": [
+    "guardian hands-free skip/reset/pause"
+   ]
+  },
+  {
+   "name": "F5-Dashboard",
+   "entityType": "feature",
+   "observations": [
+    "location, progress, autonomous %, avg time, log"
+   ]
+  },
+  {
+   "name": "FirebaseRTDB",
+   "entityType": "app",
+   "observations": [
+    "firebase/ rules + seed",
+    "<500 ms write budget"
+   ]
+  },
+  {
+   "name": "InstructionCard",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/UI/InstructionCard.cs",
+    "one prompt, 250 ms fade only"
+   ]
+  },
+  {
+   "name": "MarkerObserver",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/MarkerObserver.cs",
+    "extends DefaultObserverEventHandler; TRACKED + 2 s debounce"
+   ]
+  },
+  {
+   "name": "Mugdha",
+   "entityType": "person",
+   "observations": [
+    "Tahmidul Islam Mugdha, 0242310005101913",
+    "UI/UX, Figma, Blender, web dashboard"
+   ]
+  },
+  {
+   "name": "Parvez",
+   "entityType": "person",
+   "observations": [
+    "Mohammed Mahmud Parvez, 0242310005101514",
+    "Unity core, Vuforia, Firebase, voice"
+   ]
+  },
+  {
+   "name": "SupervisorDashboard",
+   "entityType": "app",
+   "observations": [
+    "web-supervisor-dashboard/ React+Vite+TS",
+    "live status, KPIs, activity log"
+   ]
+  },
+  {
+   "name": "TaskDefinition",
+   "entityType": "scriptable_object",
+   "observations": [
+    "Scripts/Core/TaskDefinition.cs",
+    "ordered steps; marker->step mapping"
+   ]
+  },
+  {
+   "name": "TaskStateMachine",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/TaskStateMachine.cs",
+    "single writer of task state"
+   ]
+  },
+  {
+   "name": "TelemetryService",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Telemetry/TelemetryService.cs",
+    "writes logs/liveStatus/sessions; listens overrides"
+   ]
+  },
+  {
+   "name": "VoiceCommandRouter",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Voice/VoiceCommandRouter.cs",
+    "phrase -> OverrideCommand; guardian-gated"
+   ]
+  },
+  {
+   "name": "checkpointsService",
+   "entityType": "web_service",
+   "observations": [
+    "src/lib/services/checkpoints.ts",
+    "watchLiveStatus, watchRecentLogs, fetchSessions"
+   ]
+  },
+  {
+   "name": "metricsService",
+   "entityType": "web_service",
+   "observations": [
+    "src/lib/services/metrics.ts",
+    "autonomousPct, avgCompletionMs (tested)"
+   ]
+  },
+  {
+   "name": "rtdb:/checkpointLogs",
+   "entityType": "rtdb_path",
+   "observations": [
+    "append-only, server timestamp"
+   ]
+  },
+  {
+   "name": "rtdb:/liveStatus",
+   "entityType": "rtdb_path",
+   "observations": [
+    "current checkpoint + progress per student"
+   ]
+  },
+  {
+   "name": "rtdb:/overrides",
+   "entityType": "rtdb_path",
+   "observations": [
+    "skip/reset/pause/resume from voice/menu/dashboard"
+   ]
+  },
+  {
+   "name": "rtdb:/routes",
+   "entityType": "rtdb_path",
+   "observations": [
+    "route + checkpoint definitions"
+   ]
+  },
+  {
+   "name": "rtdb:/sessions",
+   "entityType": "rtdb_path",
+   "observations": [
+    "per-task run; autonomousCount, checkpointsReached"
+   ]
+  }
+ ],
+ "relations": [
+  {
+   "from": "MarkerObserver",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "VoiceCommandRouter",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "InstructionCard",
+   "to": "TaskStateMachine",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "TaskStateMachine",
+   "to": "TaskDefinition",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "rtdb:/checkpointLogs",
+   "relationType": "writes_to"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "rtdb:/liveStatus",
+   "relationType": "writes_to"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "rtdb:/sessions",
+   "relationType": "writes_to"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "rtdb:/overrides",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "VoiceCommandRouter",
+   "to": "rtdb:/overrides",
+   "relationType": "writes_to"
+  },
+  {
+   "from": "checkpointsService",
+   "to": "rtdb:/checkpointLogs",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "checkpointsService",
+   "to": "rtdb:/liveStatus",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "checkpointsService",
+   "to": "rtdb:/sessions",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "metricsService",
+   "to": "checkpointsService",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "MarkerObserver",
+   "to": "F1-ARGuidance",
+   "relationType": "implements"
+  },
+  {
+   "from": "TaskStateMachine",
+   "to": "F1-ARGuidance",
+   "relationType": "implements"
+  },
+  {
+   "from": "InstructionCard",
+   "to": "F2-LowSensoryUI",
+   "relationType": "implements"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "F3-PathTracking",
+   "relationType": "implements"
+  },
+  {
+   "from": "VoiceCommandRouter",
+   "to": "F4-VoiceOverride",
+   "relationType": "implements"
+  },
+  {
+   "from": "SupervisorDashboard",
+   "to": "F5-Dashboard",
+   "relationType": "implements"
+  },
+  {
+   "from": "ChildApp",
+   "to": "Parvez",
+   "relationType": "owned_by"
+  },
+  {
+   "from": "FirebaseRTDB",
+   "to": "Parvez",
+   "relationType": "owned_by"
+  },
+  {
+   "from": "SupervisorDashboard",
+   "to": "Mugdha",
+   "relationType": "owned_by"
+  },
+  {
+   "from": "BlenderAssets",
+   "to": "Mugdha",
+   "relationType": "owned_by"
+  },
+  {
+   "from": "F2-LowSensoryUI",
+   "to": "Mugdha",
+   "relationType": "owned_by"
+  },
+  {
+   "from": "TaskStateMachine",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "MarkerObserver",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "TelemetryService",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "VoiceCommandRouter",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "InstructionCard",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "TaskDefinition",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "checkpointsService",
+   "to": "SupervisorDashboard",
+   "relationType": "part_of"
+  },
+  {
+   "from": "metricsService",
+   "to": "SupervisorDashboard",
+   "relationType": "part_of"
+  }
+ ]
+}

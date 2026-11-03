@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(git add:*)", "Bash(git commit:*)",
+      "Bash(npm run:*)", "Bash(npm test:*)", "Bash(npx tsc:*)", "Bash(npx vitest:*)",
+      "Bash(firebase emulators:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(grep:*)", "Bash(rg:*)"
+    ],
+    "deny": [
+      "Read(./.env)", "Read(./.env.*)", "Read(**/google-services.json)", "Read(**/*service-account*.json)",
+      "Read(./unity-child-app/Library/**)", "Read(./unity-child-app/Temp/**)",
+      "Read(./web-supervisor-dashboard/node_modules/**)", "Read(./web-supervisor-dashboard/dist/**)",
+      "Read(**/*.fbx)", "Read(**/*.blend)",
+      "Bash(firebase deploy:*)", "Bash(git push --force:*)", "Bash(rm -rf:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": ["memory"],
+  "includeCoAuthoredBy": true
+}

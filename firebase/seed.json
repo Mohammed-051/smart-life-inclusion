@@ -1,0 +1,64 @@
+{
+  "students": {
+    "stu_001": { "alias": "Student A", "grade": "G3", "routeIds": { "rt_handwash": true, "rt_hall_a": true }, "active": true },
+    "stu_002": { "alias": "Student B", "grade": "G4", "routeIds": { "rt_trash": true, "rt_hall_a": true }, "active": true }
+  },
+  "devices": {
+    "dev_uid_tablet01": { "studentId": "stu_001", "label": "Tablet 01" }
+  },
+  "supervisors": {
+    "sup_uid_teacher01": { "role": "teacher", "students": { "stu_001": true, "stu_002": true } },
+    "sup_uid_admin01": { "role": "admin", "students": {} }
+  },
+  "routes": {
+    "rt_handwash": {
+      "name": "Handwashing", "kind": "adl",
+      "checkpoints": {
+        "cp_wet":   { "order": 1, "markerId": "MK_SINK",   "label": "Wet your hands",  "cue": "avatar_wet" },
+        "cp_soap":  { "order": 2, "markerId": "MK_SOAP",   "label": "Take some soap",  "cue": "avatar_soap" },
+        "cp_rub":   { "order": 3, "markerId": "MK_RUB",    "label": "Rub for 20 seconds", "cue": "avatar_rub" },
+        "cp_rinse": { "order": 4, "markerId": "MK_TOWEL",  "label": "Rinse and dry",   "cue": "avatar_dry" }
+      }
+    },
+    "rt_trash": {
+      "name": "Trash sorting", "kind": "adl",
+      "checkpoints": {
+        "cp_pick":    { "order": 1, "markerId": "MK_ITEM",     "label": "Pick up the item", "cue": "avatar_pick" },
+        "cp_bin":     { "order": 2, "markerId": "MK_BIN_SIGN", "label": "Find the bin",     "cue": "avatar_point" },
+        "cp_drop":    { "order": 3, "markerId": "MK_BIN_LID",  "label": "Drop it in",       "cue": "avatar_drop" },
+        "cp_confirm": { "order": 4, "markerId": "MK_DONE",     "label": "All done",         "cue": "check" }
+      }
+    },
+    "rt_hall_a": {
+      "name": "Classroom to Washroom", "kind": "nav",
+      "checkpoints": {
+        "cp_start":   { "order": 1, "markerId": "NAV_01", "label": "Classroom door", "cue": "arrow_straight" },
+        "cp_turn":    { "order": 2, "markerId": "NAV_02", "label": "Hall corner",    "cue": "arrow_left" },
+        "cp_stairs":  { "order": 3, "markerId": "NAV_03", "label": "Near stairs",    "cue": "arrow_right" },
+        "cp_arrive":  { "order": 4, "markerId": "NAV_04", "label": "Washroom",       "cue": "arrived" }
+      }
+    }
+  },
+  "sessions": {
+    "stu_001": {
+      "ses_0001": { "routeId": "rt_hall_a", "startedAt": 1762160400000, "completedAt": 1762160580000, "status": "completed", "checkpointsReached": 4, "autonomousCount": 3 },
+      "ses_0002": { "routeId": "rt_handwash", "startedAt": 1762161000000, "completedAt": 1762161150000, "status": "completed", "checkpointsReached": 4, "autonomousCount": 4 }
+    }
+  },
+  "checkpointLogs": {
+    "stu_001": {
+      "log_0001": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_start",  "markerId": "NAV_01", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160400000 },
+      "log_0002": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_turn",   "markerId": "NAV_02", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160460000 },
+      "log_0003": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_stairs", "markerId": "NAV_03", "taskStatus": "skipped",   "autonomous": false, "deviceId": "dev_uid_tablet01", "timestamp": 1762160520000 },
+      "log_0004": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_arrive", "markerId": "NAV_04", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160580000 }
+    }
+  },
+  "liveStatus": {
+    "stu_001": { "sessionId": "ses_0002", "routeId": "rt_handwash", "checkpointId": "cp_rinse", "progressPct": 100, "state": "complete", "lastSeen": 1762161150000 }
+  },
+  "overrides": {
+    "stu_001": {
+      "ovr_0001": { "command": "skip", "source": "voice", "issuedBy": "dev_uid_tablet01", "timestamp": 1762160519000, "consumed": true }
+    }
+  }
+}

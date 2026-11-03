@@ -1,0 +1,17 @@
+/* Mirrors docs/DESIGN_SYSTEM.md. Components use these variables only. */
+:root {
+  --bg: #f7f5f0;
+  --ink: #1f2a37;
+  --go: #7fc8a9;
+  --turn: #8fb8de;
+  --wait: #f3d27a;
+  --help: #e8a0a0;
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --radius: 12px;
+  --space: 16px;
+  --font: Inter, system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
