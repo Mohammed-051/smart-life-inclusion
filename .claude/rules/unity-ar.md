@@ -5,7 +5,7 @@ paths:
   - "unity-child-app/**/*.prefab"
   - "unity-child-app/**/*.asset"
 ---
-# Unity AR rules (Unity 2022.3 LTS + Vuforia)
+# Unity AR rules (Unity 6 + URP + Vuforia)
 - Namespace `SmartLife.<Module>` matching folder: AR, Core, Telemetry, Voice, UI.
 - `Core/TaskStateMachine` is the only writer of task state. Others raise C# events or call its public API.
 - Marker detection: extend/subscribe to `DefaultObserverEventHandler` (`OnTargetFound`/`OnTargetLost`). Debounce: ignore re-detections of the same marker within 2 s.

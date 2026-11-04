@@ -2,7 +2,7 @@
 
 AI-AR ecosystem for special education, vocational training and Assisted Daily Living (ADL).
 Locked stack (Phase-I Progress Report wins over Concept Note; **no WebAR**):
-- `unity-child-app/` — "Magic Lens" child app. Unity 2022.3 LTS, Vuforia Engine (marker Image Targets), C#, Android 10+ tablets, >=30 FPS.
+- `unity-child-app/` — "Magic Lens" child app. Unity 6 (6000.6) with URP, Vuforia Engine (marker Image Targets), C#, Android 10+ tablets, >=30 FPS.
 - `firebase/` — Realtime Database rules + seed. Write latency budget <500 ms.
 - `web-supervisor-dashboard/` — React + Vite + TypeScript, Firebase JS SDK v10 (modular).
 - `blender-assets/` — avatars/props, exported FBX into Unity.
@@ -59,7 +59,7 @@ npm run build && npm run lint && npm test               # CI gate
 firebase emulators:start --only database                # local RTDB on :9000
 firebase database:set / firebase/seed.json --project <id>   # seed (dev project only)
 firebase deploy --only database                         # rules
-# Unity: open unity-child-app/ in Unity Hub (2022.3 LTS). Tests: Window > General > Test Runner.
+# Unity: open unity-child-app/ in Unity Hub (Unity 6, 6000.6.8f1). Tests: Window > General > Test Runner.
 # CLI tests: Unity -batchmode -projectPath unity-child-app -runTests -testPlatform EditMode
 ```
 
