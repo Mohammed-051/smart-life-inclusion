@@ -23,6 +23,10 @@ namespace SmartLife.Core
         public MachineState State { get; private set; } = MachineState.Idle;
         public int StepIndex { get; private set; }
         public float ProgressPct => task == null || task.Count == 0 ? 0f : 100f * StepIndex / task.Count;
+        /// <summary>True while the current step's hold timer runs. Marker scans are ignored until it ends.</summary>
+        public bool IsHolding => State == MachineState.Active && _holdTimer > 0f;
+        /// <summary>Seconds left on the current hold, for UI feedback.</summary>
+        public float HoldSecondsRemaining => IsHolding ? _holdTimer : 0f;
 
         private MachineState _stateBeforePause;
         private bool _assistedThisStep;
@@ -41,6 +45,10 @@ namespace SmartLife.Core
         public void HandleMarker(string markerId)
         {
             if (State == MachineState.Paused || State == MachineState.Complete || task == null) return;
+
+            // Time lock: a hold step only ends when its timer does, so no scan can skip it.
+            // Guardian overrides go through Apply() and can still move on.
+            if (IsHolding) return;
 
             var expected = task[StepIndex];
             if (markerId != expected.markerId)
@@ -90,10 +98,12 @@ namespace SmartLife.Core
         /// <summary>Guardian tap/assist on current step: marks it non-autonomous.</summary>
         public void MarkAssisted() => _assistedThisStep = true;
 
-        private void Update()
+        private void Update() => Tick(Time.deltaTime);
+
+        private void Tick(float deltaTime)
         {
-            if (State != MachineState.Active || _holdTimer <= 0f) return;
-            _holdTimer -= Time.deltaTime;
+            if (!IsHolding) return;
+            _holdTimer -= deltaTime;
             if (_holdTimer <= 0f) CompleteStep();
         }
 
