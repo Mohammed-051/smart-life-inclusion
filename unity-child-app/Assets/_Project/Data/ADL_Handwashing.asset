@@ -17,19 +17,25 @@ MonoBehaviour:
   steps:
   - checkpointId: cp_wet
     markerId: MK_SINK
-    prompt: Turn on the faucet
+    prompt: Wet your hands
     cue: 0
     demoClip: {fileID: 0}
     holdSeconds: 0
   - checkpointId: cp_soap
     markerId: MK_SOAP
-    prompt: Apply soap to hands
+    prompt: Take some soap
     cue: 0
     demoClip: {fileID: 0}
     holdSeconds: 0
+  - checkpointId: cp_rub
+    markerId: MK_RUB
+    prompt: Rub for 20 seconds
+    cue: 0
+    demoClip: {fileID: 0}
+    holdSeconds: 20
   - checkpointId: cp_rinse
     markerId: MK_TOWEL
-    prompt: Rinse and dry hands
+    prompt: Rinse and dry
     cue: 0
     demoClip: {fileID: 0}
     holdSeconds: 5

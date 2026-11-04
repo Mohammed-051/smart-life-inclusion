@@ -21,6 +21,15 @@ namespace SmartLife.EditorTools
         private static readonly Color Surface = new Color(1f, 1f, 1f, 0.85f);
         private const float PromptFontSize = 48f; // Within the 40-56 sp prompt range.
 
+        // Must match the rt_handwash markers in firebase/seed.json and ADL_Handwashing.asset.
+        private static readonly (string ObjectName, string MarkerId)[] Markers =
+        {
+            ("ImageTarget_Sink", "MK_SINK"),
+            ("ImageTarget_Soap", "MK_SOAP"),
+            ("ImageTarget_Rub", "MK_RUB"),
+            ("ImageTarget_Towel", "MK_TOWEL"),
+        };
+
         [MenuItem("SMART-LIFE/Scaffold Sprint 1 Scene")]
         public static void Scaffold()
         {
@@ -34,9 +43,12 @@ namespace SmartLife.EditorTools
             TaskStateMachine stateMachine = GetOrAdd<TaskStateMachine>(controller);
             GetOrAdd<SceneBootstrapper>(controller);
 
-            GameObject target = GetOrCreateRoot(scene, "ImageTarget_Sink");
-            MarkerObserver observer = GetOrAdd<MarkerObserver>(target);
-            SetReference(observer, "stateMachine", stateMachine);
+            foreach ((string objectName, string markerId) in Markers)
+            {
+                MarkerObserver observer = GetOrAdd<MarkerObserver>(GetOrCreateRoot(scene, objectName));
+                SetReference(observer, "stateMachine", stateMachine);
+                SetString(observer, "markerIdOverride", markerId);
+            }
 
             BuildCanvas(scene, stateMachine);
 
@@ -46,7 +58,7 @@ namespace SmartLife.EditorTools
 
             Debug.Log("[ADLSceneBuilder] Sprint 1 scene scaffolded. Save the scene, then do these by hand:\n" +
                       "1. Add the Vuforia ARCamera (GameObject > Vuforia Engine > AR Camera). The scene has no camera until you do.\n" +
-                      "2. Add the Vuforia ImageTarget behaviour to ImageTarget_Sink and select your target. Remove any DefaultObserverEventHandler it adds, since MarkerObserver replaces it.\n" +
+                      "2. Add the Vuforia ImageTarget behaviour to all four ImageTarget_ objects and select each target. Remove any DefaultObserverEventHandler it adds, since MarkerObserver replaces it.\n" +
                       "3. Add TelemetryService and link its State Machine field to GameController.\n" +
                       "4. Create a TaskDefinition (Create > SmartLife > Task Definition) and assign it to SceneBootstrapper on GameController.");
         }
@@ -124,6 +136,13 @@ namespace SmartLife.EditorTools
         private static T GetOrAdd<T>(GameObject target) where T : Component
         {
             return target.TryGetComponent(out T existing) ? existing : Undo.AddComponent<T>(target);
+        }
+
+        private static void SetString(Object owner, string field, string value)
+        {
+            var serialized = new SerializedObject(owner);
+            serialized.FindProperty(field).stringValue = value;
+            serialized.ApplyModifiedProperties();
         }
 
         /// <summary>Assigns a private [SerializeField] so the link is saved with the scene.</summary>
