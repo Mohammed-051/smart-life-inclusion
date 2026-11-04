@@ -1,0 +1,27 @@
+/* App shell. Tokens only, per docs/DESIGN_SYSTEM.md. */
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+.shell-nav { display: flex; flex-direction: column; gap: 4px; padding: var(--space); background: var(--surface); }
+.shell-brand { padding: 0 12px 8px; }
+.shell-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  color: var(--ink);
+  text-decoration: none;
+}
+.shell-link:hover { background: var(--bg); }
+.shell-link.active { background: var(--go); font-weight: 600; }
+.shell-link:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.shell-main { flex: 1; min-width: 0; width: 100%; max-width: 1200px; padding: var(--space); }
+
+.kpi-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.kpi { padding: var(--space); border-radius: var(--radius); background: var(--surface); }
+.kpi-label { color: var(--muted); font-size: 14px; }
+.kpi-value { font-size: 28px; font-weight: 600; overflow-wrap: anywhere; }
+
+@media (min-width: 768px) {
+  .shell { flex-direction: row; }
+  .shell-nav { flex: 0 0 240px; }
+}

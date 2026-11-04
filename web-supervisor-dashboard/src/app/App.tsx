@@ -1,51 +1,59 @@
-import { useEffect, useState } from 'react';
-import { watchLiveStatus, watchRecentLogs, fetchSessions } from '../lib/services/checkpoints';
-import { autonomousPct, avgCompletionMs } from '../lib/services/metrics';
-import type { CheckpointLog, LiveStatus, Session } from '../types';
+import { createBrowserRouter, Navigate, NavLink, Outlet, RouterProvider, useRouteError } from 'react-router-dom';
+import './layout.css';
 
-/** Prototype single-student view. Replace with routing once auth + student list land (S4). */
-const STUDENT_ID = 'stu_001';
+const NAV = [
+  { to: '/routines', label: 'Routine Builder' },
+  { to: '/telemetry', label: 'Live Telemetry' },
+  { to: '/emergency', label: 'Emergency Intervention' },
+];
 
-export default function App() {
-  const [live, setLive] = useState<LiveStatus | null>(null);
-  const [logs, setLogs] = useState<CheckpointLog[]>([]);
-  const [sessions, setSessions] = useState<Session[]>([]);
-
-  useEffect(() => {
-    const offLive = watchLiveStatus(STUDENT_ID, setLive);
-    const offLogs = watchRecentLogs(STUDENT_ID, 50, setLogs);
-    fetchSessions(STUDENT_ID).then(setSessions).catch(console.error);
-    return () => { offLive(); offLogs(); };
-  }, []);
-
-  const avgMs = avgCompletionMs(sessions);
+function AppLayout() {
   return (
-    <main style={{ padding: 'var(--space)', maxWidth: 1200, margin: '0 auto' }}>
-      <h1>Supervisor Dashboard</h1>
-      <section style={{ display: 'grid', gap: 'var(--space)', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-        <Kpi label="Current checkpoint" value={live?.checkpointId ?? '—'} />
-        <Kpi label="Route progress" value={live ? `${live.progressPct}%` : '—'} />
-        <Kpi label="Autonomous navigation" value={`${autonomousPct(sessions).toFixed(0)}%`} />
-        <Kpi label="Avg completion" value={avgMs ? `${(avgMs / 1000).toFixed(0)} s` : '—'} />
-      </section>
-      <h2>Recent activity</h2>
-      <ul>
-        {logs.map((l) => (
-          <li key={l.id}>
-            {new Date(l.timestamp).toLocaleTimeString()} · {l.checkpointId} · {l.taskStatus}
-            {l.autonomous ? '' : ' (assisted)'}
-          </li>
+    <div className="shell">
+      <nav className="shell-nav" aria-label="Main">
+        <strong className="shell-brand">Smart-Life Supervisor</strong>
+        {NAV.map(({ to, label }) => (
+          <NavLink key={to} to={to} className="shell-link">
+            {label}
+          </NavLink>
         ))}
-      </ul>
-    </main>
+      </nav>
+      <main className="shell-main">
+        <Outlet />
+      </main>
+    </div>
   );
 }
 
-function Kpi({ label, value }: { label: string; value: string }) {
+// Pages load Firebase lazily, so missing config breaks only the page that needs it.
+function PageError() {
+  console.error(useRouteError());
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 'var(--space)' }}>
-      <div style={{ color: 'var(--muted)', fontSize: 14 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 600 }}>{value}</div>
-    </div>
+    <>
+      <h1>This page could not load</h1>
+      <p>Check that <code>.env</code> has your Firebase settings (see <code>.env.example</code>), then reload.</p>
+    </>
   );
+}
+
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      {
+        errorElement: <PageError />,
+        children: [
+          { index: true, element: <Navigate to="/telemetry" replace /> },
+          { path: 'routines', lazy: () => import('./pages/RoutineBuilderPage') },
+          { path: 'telemetry', lazy: () => import('./pages/LiveTelemetryPage') },
+          { path: 'emergency', lazy: () => import('./pages/EmergencyInterventionPage') },
+          { path: '*', element: <Navigate to="/telemetry" replace /> },
+        ],
+      },
+    ],
+  },
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }

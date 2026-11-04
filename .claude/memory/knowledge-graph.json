@@ -11,8 +11,33 @@
    "name": "ChildApp",
    "entityType": "app",
    "observations": [
-    "unity-child-app/ Magic Lens, Unity 2022.3 + Vuforia",
+    "unity-child-app/ Magic Lens, Unity 6 + URP + Vuforia",
     "Android 10+ tablet, >=30 FPS"
+   ]
+  },
+  {
+   "name": "ClinicalArchitecture",
+   "entityType": "doc",
+   "observations": [
+    "docs/clinical_architecture.md",
+    "Phase 2 HLD/LLD; proposed telemetry schema"
+   ]
+  },
+  {
+   "name": "EmergencyDetector",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/EmergencyDetector.cs",
+    "audio, IMU, SOS triggers; pauses task, raises OnEmergency",
+    "telemetry and classifier not wired yet"
+   ]
+  },
+  {
+   "name": "EmergencyInterventionPage",
+   "entityType": "web_component",
+   "observations": [
+    "src/app/pages/EmergencyInterventionPage.tsx",
+    "placeholder route /emergency; alerts not connected"
    ]
   },
   {
@@ -59,6 +84,24 @@
    ]
   },
   {
+   "name": "GuardianConsent",
+   "entityType": "doc",
+   "observations": [
+    "docs/GUARDIAN_CONSENT.md",
+    "draft consent: camera, RECORD_AUDIO, edge AI, streaming",
+    "needs ethics or legal review before use"
+   ]
+  },
+  {
+   "name": "HesitationMonitor",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/HesitationMonitor.cs",
+    "15 s wait, raises OnHesitation for AAC board",
+    "AAC board UI not built yet"
+   ]
+  },
+  {
    "name": "InstructionCard",
    "entityType": "unity_script",
    "observations": [
@@ -67,11 +110,28 @@
    ]
   },
   {
+   "name": "LiveTelemetryPage",
+   "entityType": "web_component",
+   "observations": [
+    "src/app/pages/LiveTelemetryPage.tsx",
+    "route /telemetry: live status, KPIs, activity log"
+   ]
+  },
+  {
    "name": "MarkerObserver",
    "entityType": "unity_script",
    "observations": [
     "Scripts/AR/MarkerObserver.cs",
     "extends DefaultObserverEventHandler; TRACKED + 2 s debounce"
+   ]
+  },
+  {
+   "name": "MascotStateManager",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/MascotStateManager.cs",
+    "swaps 3D instruction and low-poly ambient models",
+    "reads task state only; needs model references"
    ]
   },
   {
@@ -88,6 +148,23 @@
    "observations": [
     "Mohammed Mahmud Parvez, 0242310005101514",
     "Unity core, Vuforia, Firebase, voice"
+   ]
+  },
+  {
+   "name": "RoutineBuilderPage",
+   "entityType": "web_component",
+   "observations": [
+    "src/app/pages/RoutineBuilderPage.tsx",
+    "placeholder route /routines"
+   ]
+  },
+  {
+   "name": "SecurityPolicy",
+   "entityType": "doc",
+   "observations": [
+    "docs/SECURITY.md",
+    "emergency-only two-way WebRTC exception",
+    "exception not enforced in code or rules yet"
    ]
   },
   {
@@ -347,6 +424,96 @@
    "from": "metricsService",
    "to": "SupervisorDashboard",
    "relationType": "part_of"
+  },
+  {
+   "from": "MascotStateManager",
+   "to": "TaskStateMachine",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "HesitationMonitor",
+   "to": "TaskStateMachine",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "EmergencyDetector",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "MascotStateManager",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "HesitationMonitor",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "EmergencyDetector",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "MascotStateManager",
+   "to": "ClinicalArchitecture",
+   "relationType": "specified_in"
+  },
+  {
+   "from": "HesitationMonitor",
+   "to": "ClinicalArchitecture",
+   "relationType": "specified_in"
+  },
+  {
+   "from": "EmergencyDetector",
+   "to": "ClinicalArchitecture",
+   "relationType": "specified_in"
+  },
+  {
+   "from": "EmergencyDetector",
+   "to": "SecurityPolicy",
+   "relationType": "specified_in"
+  },
+  {
+   "from": "EmergencyDetector",
+   "to": "GuardianConsent",
+   "relationType": "specified_in"
+  },
+  {
+   "from": "SecurityPolicy",
+   "to": "GuardianConsent",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "RoutineBuilderPage",
+   "to": "SupervisorDashboard",
+   "relationType": "part_of"
+  },
+  {
+   "from": "LiveTelemetryPage",
+   "to": "SupervisorDashboard",
+   "relationType": "part_of"
+  },
+  {
+   "from": "EmergencyInterventionPage",
+   "to": "SupervisorDashboard",
+   "relationType": "part_of"
+  },
+  {
+   "from": "LiveTelemetryPage",
+   "to": "checkpointsService",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "LiveTelemetryPage",
+   "to": "metricsService",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "EmergencyInterventionPage",
+   "to": "SecurityPolicy",
+   "relationType": "specified_in"
   }
  ]
 }
