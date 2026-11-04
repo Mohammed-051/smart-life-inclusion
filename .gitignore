@@ -51,3 +51,5 @@ coverage/
 firebase-debug.log
 database-debug.log
 *.tsbuildinfo
+google-services-desktop.json
+google-services-desktop.json.meta

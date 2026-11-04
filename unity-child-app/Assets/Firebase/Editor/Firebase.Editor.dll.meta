@@ -29,7 +29,23 @@ PluginImporter:
         CPU: AnyCPU
         DefaultValueInitialized: true
         OS: AnyOS
+    Linux:
+      enabled: 0
+      settings:
+        CPU: None
     Linux64:
+      enabled: 0
+      settings:
+        CPU: None
+    LinuxUniversal:
+      enabled: 0
+      settings:
+        CPU: None
+    OSXIntel:
+      enabled: 0
+      settings:
+        CPU: None
+    OSXIntel64:
       enabled: 0
       settings:
         CPU: None
@@ -37,7 +53,10 @@ PluginImporter:
       enabled: 0
       settings:
         CPU: None
-    WebGL:
+    Web:
+      enabled: 0
+      settings: {}
+    WebStreamed:
       enabled: 0
       settings: {}
     Win:
