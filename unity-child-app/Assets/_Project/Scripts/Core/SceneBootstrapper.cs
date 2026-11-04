@@ -9,18 +9,18 @@ namespace SmartLife.Core
     [RequireComponent(typeof(TaskStateMachine))]
     public class SceneBootstrapper : MonoBehaviour
     {
-        public TaskDefinition taskDefinition;
+        [SerializeField] private TaskDefinition _taskDefinition;
 
         private void Start()
         {
             // Begin() would make InstructionCard read a prompt from a missing task, so stop here instead.
-            if (taskDefinition == null)
+            if (_taskDefinition == null)
             {
                 Debug.LogError("[SceneBootstrapper] Assign a TaskDefinition before entering Play mode.", this);
                 return;
             }
 
-            GetComponent<TaskStateMachine>().Begin(taskDefinition);
+            GetComponent<TaskStateMachine>().Begin(_taskDefinition);
         }
     }
 }
