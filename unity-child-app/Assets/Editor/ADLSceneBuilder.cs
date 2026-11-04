@@ -32,6 +32,7 @@ namespace SmartLife.EditorTools
 
             GameObject controller = GetOrCreateRoot(scene, "GameController");
             TaskStateMachine stateMachine = GetOrAdd<TaskStateMachine>(controller);
+            GetOrAdd<SceneBootstrapper>(controller);
 
             GameObject target = GetOrCreateRoot(scene, "ImageTarget_Sink");
             MarkerObserver observer = GetOrAdd<MarkerObserver>(target);
@@ -47,8 +48,7 @@ namespace SmartLife.EditorTools
                       "1. Add the Vuforia ARCamera (GameObject > Vuforia Engine > AR Camera). The scene has no camera until you do.\n" +
                       "2. Add the Vuforia ImageTarget behaviour to ImageTarget_Sink and select your target. Remove any DefaultObserverEventHandler it adds, since MarkerObserver replaces it.\n" +
                       "3. Add TelemetryService and link its State Machine field to GameController.\n" +
-                      "4. Create a TaskDefinition (Create > SmartLife > Task Definition) and assign it to TaskStateMachine.\n" +
-                      "5. Call TaskStateMachine.Begin() when the task should start. No script calls it yet, so markers are ignored until then.");
+                      "4. Create a TaskDefinition (Create > SmartLife > Task Definition) and assign it to SceneBootstrapper on GameController.");
         }
 
         private static void DeleteDefaultCamera(Scene scene)
