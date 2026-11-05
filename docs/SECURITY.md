@@ -9,18 +9,19 @@ Users are minors with disabilities: treat all student data as sensitive.
 
 ## Emergency streaming exception
 Two-way encrypted WebRTC audio and video may leave the tablet only when **all** of these hold:
-1. `EmergencyDetector` raised an emergency (audio, IMU or SOS source) that is still open. Other pauses, including the voice "emergency pause", do not qualify.
+1. `EmergencyDetector` raised an **SOS** emergency that is still open. Audio and IMU alerts and other pauses, including the voice "emergency pause", do not unlock a stream. A later SOS press upgrades an open alert.
 2. The student's guardian has signed the streaming section of `docs/GUARDIAN_CONSENT.md`, and an admin has recorded it.
 3. A supervisor assigned to that student started the stream. Detection unlocks streaming but never starts it.
 
 Requirements while a stream runs:
+- A task marked `privateSpace` sends audio only and shows "Microphone on". Tasks are private by default, and `ADL_Handwashing` stays private until the team decides how streaming works near washrooms (`docs/clinical_architecture.md` section 6).
 - Encrypted with DTLS-SRTP. Any TURN relay carries encrypted media only.
 - No recording, screenshots, stored frames or transcripts on the tablet, dashboard or backend.
 - The tablet shows a steady, non-flashing "camera on" indicator, and an adult at the tablet can end the stream.
 - The stream ends, and the camera and microphone are released, when the emergency is resolved, when either side disconnects, or after 15 minutes. A new stream needs a new supervisor action.
 - Logs hold metadata only: student ID, supervisor ID, emergency ID, start and end time.
 
-**Status:** policy only. No streaming code exists, and the database rules do not enforce these conditions yet. Do not enable streaming until they do (`docs/clinical_architecture.md` section 2.4).
+**Status:** implemented, not field-tested. `StreamPolicy` on the tablet, `firebase/database.rules.json` and the dashboard each enforce these conditions. `students/{id}/streamingConsent` stays false until an admin records a signed form. Before any use with a learner: get `GUARDIAN_CONSENT.md` reviewed, test on the target tablet with Vuforia, and provision a TURN server if school networks need one. Setup data (SDP and candidates, which include IP addresses) stays in `/interventions` until cleared, so include it in the end-of-project deletion.
 
 ## Auth
 - Firebase Auth email/password for supervisors; one dedicated account per tablet (mapped in `/devices/{uid}`).

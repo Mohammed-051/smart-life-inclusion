@@ -51,6 +51,14 @@ export const nodeMetricSchema = z.object({
   timestamp: z.number(),
 });
 
+export const emergencySchema = z.object({
+  source: z.enum(['audio', 'imu', 'sos']),
+  status: z.enum(['open', 'acknowledged', 'resolved']),
+  acknowledgedBy: z.string().optional(),
+  sessionId: z.string().optional(),
+  timestamp: z.number(),
+});
+
 export const routeCheckpointSchema = z.object({
   order: z.number().int().min(1),
   markerId: z.string().min(1).max(64),

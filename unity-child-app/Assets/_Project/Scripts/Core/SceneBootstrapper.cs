@@ -24,6 +24,7 @@ namespace SmartLife.Core
         private IDeviceAuth _auth;
         private GuardianMenu _menu;
         private EmergencyDetector _emergency;
+        private EmergencyCoordinator _emergencies;
         private bool _soundAlertsOn;
 
         private void Start()
@@ -59,6 +60,12 @@ namespace SmartLife.Core
             else Debug.LogWarning("[SceneBootstrapper] VoiceCommandRouter is missing or disabled, so voice commands are off.", this);
 
             _emergency = GetComponent<EmergencyDetector>();
+            if (_emergency != null)
+            {
+                _emergencies = gameObject.AddComponent<EmergencyCoordinator>();
+                _emergencies.Init(_emergency, session != null ? telemetry : null, _taskDefinition.PrivateSpace, ReleaseMicrophone);
+            }
+
             var hesitation = GetComponent<HesitationMonitor>();
             if (hesitation != null)
                 gameObject.AddComponent<AacBoard>().Init(_machine, hesitation, telemetry, GetComponent<MascotStateManager>());
@@ -90,6 +97,11 @@ namespace SmartLife.Core
                 actions.Add(new GuardianMenu.MenuAction(() => voiceRouter.Enabled ? "Voice commands: on" : "Voice commands: off", ToggleVoice));
             if (_emergency != null)
                 actions.Add(new GuardianMenu.MenuAction(() => _soundAlertsOn ? "Sound alerts: on" : "Sound alerts: off", ToggleSoundAlerts));
+            if (_emergencies != null)
+            {
+                actions.Add(new GuardianMenu.MenuAction("End camera or microphone call", _emergencies.EndStream));
+                actions.Add(new GuardianMenu.MenuAction("Emergency is over", _emergencies.ResolveFromTablet));
+            }
             if (signedIn) actions.Add(new GuardianMenu.MenuAction("Sign out this tablet", SignOut));
             return actions;
         }
@@ -112,6 +124,12 @@ namespace SmartLife.Core
                 if (!AndroidSpeechRecognizer.EnsureMicrophonePermission()) return;
             }
             SetSoundAlerts(turnOn);
+        }
+
+        private void ReleaseMicrophone()
+        {
+            if (voiceRouter != null) voiceRouter.SetEnabled(false);
+            SetSoundAlerts(false);
         }
 
         private void SetSoundAlerts(bool on)

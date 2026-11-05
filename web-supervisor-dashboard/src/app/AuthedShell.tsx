@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { signIn, signOut, watchAccess, watchAuth, type SupervisorAccess } from '../lib/services/auth';
+import { watchEmergencies } from '../lib/services/emergency';
 import { StudentContext } from './studentContext';
 
 /** Every data page sits behind this, because database rules refuse anonymous reads. */
@@ -51,6 +52,21 @@ function SignInForm() {
   );
 }
 
+/** Steady, on every page, so a supervisor on another page still sees an open alert. */
+function OpenAlertBanner({ studentId }: { studentId: string }) {
+  const [openCount, setOpenCount] = useState(0);
+  const { pathname } = useLocation();
+
+  useEffect(() => watchEmergencies(studentId, 20, (list) => setOpenCount(list.filter((e) => e.status === 'open').length)), [studentId]);
+
+  if (openCount === 0 || pathname === '/emergency') return null;
+  return (
+    <p role="alert" className="chip chip-help">
+      {studentId} has an open alert. <Link to="/emergency">Go to Emergency Intervention</Link>
+    </p>
+  );
+}
+
 function SignedIn({ uid }: { uid: string }) {
   const [access, setAccess] = useState<SupervisorAccess | null>(null);
   const [failed, setFailed] = useState(false);
@@ -78,6 +94,7 @@ function SignedIn({ uid }: { uid: string }) {
         <p role="alert" className="chip chip-help">This account has no supervisor record, so the database will refuse its reads. Ask an admin to add it.</p>
       )}
       <StudentContext.Provider value={studentId}>
+        {studentId && <OpenAlertBanner key={studentId} studentId={studentId} />}
         <Outlet />
       </StudentContext.Provider>
     </>

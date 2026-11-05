@@ -116,6 +116,73 @@
       }
     },
 
+    "emergencies": {
+      "$studentId": {
+        ".indexOn": ["status", "timestamp"],
+        ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin' || root.child('devices/' + auth.uid + '/studentId').val() === $studentId)",
+        "$emergencyId": {
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId && newData.child('status').val() === 'open'",
+          ".validate": "newData.hasChildren(['source', 'status', 'timestamp'])",
+          "source": { ".validate": "newData.val().matches(/^(audio|imu|sos)$/)" },
+          "status": {
+            ".write": "auth != null && data.exists() && newData.exists() && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true)",
+            ".validate": "newData.val().matches(/^(open|acknowledged|resolved)$/)"
+          },
+          "acknowledgedBy": {
+            ".write": "auth != null && newData.exists() && root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true",
+            ".validate": "newData.val() === auth.uid"
+          },
+          "sessionId": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "interventions": {
+      "$studentId": {
+        ".indexOn": ["status"],
+        ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin' || root.child('devices/' + auth.uid + '/studentId').val() === $studentId)",
+        "$interventionId": {
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true && newData.child('requestedBy').val() === auth.uid && newData.child('status').val() === 'requested' && root.child('students/' + $studentId + '/streamingConsent').val() === true && root.child('emergencies/' + $studentId + '/' + newData.child('emergencyId').val() + '/source').val() === 'sos' && root.child('emergencies/' + $studentId + '/' + newData.child('emergencyId').val() + '/status').val() !== 'resolved' && root.child('emergencies/' + $studentId + '/' + newData.child('emergencyId').val()).exists()",
+          ".validate": "newData.hasChildren(['emergencyId', 'requestedBy', 'status', 'offer', 'startedAt', 'expiresAt'])",
+          "emergencyId": { ".validate": "newData.isString()" },
+          "requestedBy": { ".validate": "newData.isString()" },
+          "offer": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+          "startedAt": { ".validate": "newData.val() === now" },
+          "expiresAt": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "status": {
+            ".write": "auth != null && data.exists() && newData.exists() && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true)",
+            ".validate": "newData.val().matches(/^(requested|connected|ended|expired)$/)"
+          },
+          "endedAt": {
+            ".write": "auth != null && newData.exists() && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true)",
+            ".validate": "newData.val() === now"
+          },
+          "answer": {
+            ".write": "auth != null && !data.exists() && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+            ".validate": "newData.isString() && newData.val().length <= 20000"
+          },
+          "candidates": {
+            "tablet": {
+              "$candidateId": {
+                ".write": "auth != null && !data.exists() && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+                ".validate": "newData.isString() && newData.val().length <= 1024"
+              }
+            },
+            "supervisor": {
+              "$candidateId": {
+                ".write": "auth != null && !data.exists() && newData.exists() && root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true",
+                ".validate": "newData.isString() && newData.val().length <= 1024"
+              }
+            },
+            "$other": { ".validate": false }
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
     "liveStatus": {
       "$studentId": {
         ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",

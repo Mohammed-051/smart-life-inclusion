@@ -12,6 +12,10 @@ namespace SmartLife.AR
     /// </summary>
     public class MascotStateManager : MonoBehaviour
     {
+        private const string PlaceholderMaterial = "PlaceholderMascot";
+        private const float PlaceholderScale = 0.25f;
+        private static readonly Vector3 PlaceholderOffset = new Vector3(0f, -0.1f, 1.2f);
+
         [SerializeField] private TaskStateMachine stateMachine;
         [Tooltip("Full 3D rig shown while instructing")]
         [SerializeField] private GameObject instructionModel;
@@ -22,6 +26,33 @@ namespace SmartLife.AR
         public event Action<MascotMode> OnModeChanged;
 
         public MascotMode Mode { get; private set; } = MascotMode.Hidden;
+
+        private void Awake()
+        {
+            if (instructionModel == null) instructionModel = CreatePlaceholder(PrimitiveType.Capsule, "Instruction Model (placeholder)", new Color32(0x7F, 0xC8, 0xA9, 0xFF));
+            if (ambientModel == null) ambientModel = CreatePlaceholder(PrimitiveType.Sphere, "Ambient Model (placeholder)", new Color32(0x8F, 0xB8, 0xDE, 0xFF));
+        }
+
+        // shortcut: primitives stand in until the Blender models arrive. Assign them in the Inspector and these are skipped.
+        private static GameObject CreatePlaceholder(PrimitiveType shape, string objectName, Color color)
+        {
+            GameObject model = GameObject.CreatePrimitive(shape);
+            model.name = objectName;
+            Destroy(model.GetComponent<Collider>());
+
+            // Built from a Resources material, because a runtime primitive's default material is not URP and draws pink.
+            Material template = Resources.Load<Material>(PlaceholderMaterial);
+            var renderer = model.GetComponent<Renderer>();
+            if (template != null) renderer.material = new Material(template) { color = color };
+            else Debug.LogWarning("[Mascot] Placeholder material is missing.", model);
+
+            Camera view = Camera.main;
+            if (view != null) model.transform.SetParent(view.transform, false);
+            model.transform.localPosition = PlaceholderOffset;
+            model.transform.localScale = Vector3.one * PlaceholderScale;
+            model.SetActive(false);
+            return model;
+        }
 
         private void OnEnable()
         {

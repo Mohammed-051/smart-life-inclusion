@@ -7,7 +7,8 @@
         "rt_handwash": true,
         "rt_hall_a": true
       },
-      "active": true
+      "active": true,
+      "streamingConsent": false
     },
     "stu_002": {
       "alias": "Student B",
@@ -16,7 +17,8 @@
         "rt_trash": true,
         "rt_hall_a": true
       },
-      "active": true
+      "active": true,
+      "streamingConsent": false
     }
   },
   "devices": {

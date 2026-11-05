@@ -289,6 +289,56 @@
    "observations": [
     "per-task run; autonomousCount, checkpointsReached"
    ]
+  },
+  {
+   "name": "GuardianMenu",
+   "entityType": "ui",
+   "observations": [
+    "Scripts/UI/GuardianMenu.cs PIN gate, tablet sign-in, in-task menu behind a 3 s corner press",
+    "built from code by SceneBootstrapper"
+   ]
+  },
+  {
+   "name": "DeviceAuthService",
+   "entityType": "module",
+   "observations": [
+    "Scripts/Telemetry/DeviceAuthService.cs Firebase Auth session, /devices lookup, routine fetch"
+   ]
+  },
+  {
+   "name": "AacBoard",
+   "entityType": "ui",
+   "observations": [
+    "Scripts/UI/AacBoard.cs four-symbol board, opens on HesitationMonitor.OnHesitation, freezes time via PauseLock"
+   ]
+  },
+  {
+   "name": "AndroidSpeechRecognizer",
+   "entityType": "module",
+   "observations": [
+    "Scripts/Voice/AndroidSpeechRecognizer.cs Android SpeechRecognizer through AndroidJavaObject, silent outside Android"
+   ]
+  },
+  {
+   "name": "EmergencyCoordinator",
+   "entityType": "module",
+   "observations": [
+    "Scripts/Core/EmergencyCoordinator.cs joins detector, /emergencies, /interventions, call and overlay"
+   ]
+  },
+  {
+   "name": "StreamPolicy",
+   "entityType": "module",
+   "observations": [
+    "Scripts/Core/StreamPolicy.cs tablet-side check before capture: open SOS, supervisor request, consent, not expired; private route is audio only"
+   ]
+  },
+  {
+   "name": "EmergencyStream",
+   "entityType": "module",
+   "observations": [
+    "Scripts/Core/EmergencyStream.cs com.unity.webrtc call answering a supervisor offer"
+   ]
   }
  ],
  "relations": [
@@ -596,6 +646,21 @@
    "from": "Phase4AutoWirer",
    "to": "ADL_HandwashingScene",
    "relationType": "writes_to"
+  },
+  {
+   "from": "GuardianMenu",
+   "to": "DeviceAuthService",
+   "relationType": "uses"
+  },
+  {
+   "from": "EmergencyCoordinator",
+   "to": "StreamPolicy",
+   "relationType": "checks"
+  },
+  {
+   "from": "EmergencyCoordinator",
+   "to": "EmergencyStream",
+   "relationType": "runs"
   }
  ]
 }

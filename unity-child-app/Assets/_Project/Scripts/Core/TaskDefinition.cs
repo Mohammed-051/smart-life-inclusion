@@ -28,9 +28,12 @@ namespace SmartLife.Core
         [SerializeField] private string routeId = "rt_handwash";
         [SerializeField] private Kind kind = Kind.Adl;
         [SerializeField] private Step[] steps = Array.Empty<Step>();
+        [Tooltip("On a private route, such as near a washroom, an emergency call sends audio only. Clear this only after a supervising adult confirms the space is not private.")]
+        [SerializeField] private bool privateSpace = true;
 
         public string RouteId => routeId;
         public Kind TaskKind => kind;
+        public bool PrivateSpace => privateSpace;
         public int Count => steps.Length;
         public Step this[int i] => steps[i];
 
@@ -58,6 +61,7 @@ namespace SmartLife.Core
             copy.name = name;
             copy.routeId = routeId;
             copy.kind = kind;
+            copy.privateSpace = privateSpace;
             copy.steps = arranged.ToArray();
             return copy;
         }

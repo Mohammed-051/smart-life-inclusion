@@ -12,7 +12,7 @@ namespace SmartLife.Telemetry
     /// Writes checkpoint logs, step metrics and live status to Firebase RTDB and listens for dashboard
     /// overrides. Writes are fire-and-forget with offline persistence so the child is never blocked by network.
     /// </summary>
-    public class TelemetryService : MonoBehaviour
+    public partial class TelemetryService : MonoBehaviour
     {
         private const float LivePushSeconds = 5f;
         private const int MsPerSecond = 1000;
@@ -77,6 +77,7 @@ namespace SmartLife.Telemetry
                 stateMachine.OnUnexpectedMarker += LogWrongScan;
                 _pendingOverrides = _root.Child(DbPaths.Overrides(_studentId)).OrderByChild("consumed").EqualTo(false);
                 _pendingOverrides.ChildAdded += OnOverride;
+                ConnectEmergencySignaling();
 
                 // The task may already have begun while Firebase was starting.
                 if (stateMachine.State == MachineState.Awaiting) PushLiveStatus(stateMachine.State, stateMachine.StepIndex);
@@ -237,6 +238,7 @@ namespace SmartLife.Telemetry
 
         private void OnDestroy()
         {
+            DisconnectEmergencySignaling();
             if (_pendingOverrides != null) _pendingOverrides.ChildAdded -= OnOverride;
             if (stateMachine == null) return;
             stateMachine.OnStepEvent -= LogStep;

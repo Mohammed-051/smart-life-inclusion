@@ -128,3 +128,69 @@ describe('node metrics', () => {
     expect(canRead(null, '/nodeMetrics/stu_001/ses_0002')).toBe(false);
   });
 });
+
+describe('emergency streaming', () => {
+  const withEmergency = (source: string, status: string, consent: boolean) => {
+    const data = structuredClone(seed);
+    data.students.stu_001.streamingConsent = consent;
+    data.emergencies = { stu_001: { em1: { source, status, timestamp: NOW - 1000 } } };
+    return data;
+  };
+  const request = (over: object = {}) => ({
+    emergencyId: 'em1', requestedBy: TEACHER.uid, status: 'requested', offer: 'v=0', startedAt: NOW, expiresAt: NOW + 60000, ...over,
+  });
+  const running = () => {
+    const data = withEmergency('sos', 'open', true);
+    data.interventions = { stu_001: { in1: request() } };
+    return data;
+  };
+
+  it('lets an assigned supervisor start a call for an open SOS with consent', () => {
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('sos', 'open', true))).toBe(true);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('sos', 'acknowledged', true))).toBe(true);
+  });
+
+  it('refuses without consent, without an open SOS, or for a missing emergency', () => {
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('sos', 'open', false))).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('audio', 'open', true))).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('imu', 'open', true))).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request(), withEmergency('sos', 'resolved', true))).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request({ emergencyId: 'nope' }), withEmergency('sos', 'open', true))).toBe(false);
+  });
+
+  it('refuses the tablet, a stranger, another supervisor name and a long expiry', () => {
+    const data = withEmergency('sos', 'open', true);
+    expect(canWrite(TABLET, '/interventions/stu_001/in1', request({ requestedBy: TABLET.uid }), data)).toBe(false);
+    expect(canWrite(STRANGER, '/interventions/stu_001/in1', request({ requestedBy: STRANGER.uid }), data)).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request({ requestedBy: ADMIN.uid }), data)).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1', request({ expiresAt: NOW + 900000 }), data)).toBe(false);
+    expect(canWrite(null, '/interventions/stu_001/in1', request(), data)).toBe(false);
+  });
+
+  it('lets each side write only its own part of a call', () => {
+    const data = running();
+    expect(canWrite(TABLET, '/interventions/stu_001/in1/answer', 'v=0', data)).toBe(true);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1/answer', 'v=0', data)).toBe(false);
+    expect(canWrite(TABLET, '/interventions/stu_001/in1/candidates/tablet/c1', '{}', data)).toBe(true);
+    expect(canWrite(TABLET, '/interventions/stu_001/in1/candidates/supervisor/c1', '{}', data)).toBe(false);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1/candidates/supervisor/c1', '{}', data)).toBe(true);
+    expect(canWrite(TABLET, '/interventions/stu_001/in1/status', 'ended', data)).toBe(true);
+    expect(canWrite(TEACHER, '/interventions/stu_001/in1/status', 'ended', data)).toBe(true);
+    expect(canWrite(STRANGER, '/interventions/stu_001/in1/status', 'ended', data)).toBe(false);
+    expect(canWrite(TABLET, '/interventions/stu_001/in1/offer', 'x', data)).toBe(false);
+  });
+
+  it('lets only the tablet raise an emergency, and supervisors acknowledge it', () => {
+    const fresh = { source: 'sos', status: 'open', timestamp: NOW };
+    expect(canWrite(TABLET, '/emergencies/stu_001/em2', fresh)).toBe(true);
+    expect(canWrite(TEACHER, '/emergencies/stu_001/em2', fresh)).toBe(false);
+    expect(canWrite(TABLET, '/emergencies/stu_002/em2', fresh)).toBe(false);
+    const data = withEmergency('sos', 'open', true);
+    expect(canWrite(TEACHER, '/emergencies/stu_001/em1/status', 'resolved', data)).toBe(true);
+    expect(canWrite(TEACHER, '/emergencies/stu_001/em1/acknowledgedBy', TEACHER.uid, data)).toBe(true);
+    expect(canWrite(TEACHER, '/emergencies/stu_001/em1/acknowledgedBy', ADMIN.uid, data)).toBe(false);
+    expect(canWrite(TEACHER, '/emergencies/stu_001/em1/source', 'audio', data)).toBe(false);
+    expect(canRead(TEACHER, '/emergencies/stu_001', data)).toBe(true);
+    expect(canRead(null, '/emergencies/stu_001', data)).toBe(false);
+  });
+});

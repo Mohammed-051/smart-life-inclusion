@@ -2,7 +2,7 @@
 All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`). No names in logs.
 
 ```
-/students/{studentId}         { alias, grade, routeIds: {rt_x: true}, active: bool }
+/students/{studentId}         { alias, grade, routeIds: {rt_x: true}, active: bool, streamingConsent?: bool (admin records it) }
 /devices/{authUid}            { studentId, label }
 /supervisors/{authUid}        { role: "teacher"|"guardian"|"admin", students: {stu_x: true} }
 /routes/{routeId}             { name, kind: "nav"|"adl", version, checkpoints: {cpId: {order, markerId, label, cue,
@@ -19,6 +19,12 @@ All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`)
                                 autonomous: bool, deviceId, timestamp }
 /liveStatus/{studentId}       { sessionId, routeId, checkpointId, progressPct, state, lastSeen, stepHesitationMs?, wrongScanCount?,
                                 aacRequest?: "too_loud"|"need_help"|"show_me"|"break" (current step only) }
+/emergencies/{studentId}/{id} { source: "audio"|"imu"|"sos", status: "open"|"acknowledged"|"resolved",
+                                acknowledgedBy?, sessionId?, timestamp }
+/interventions/{studentId}/{id}
+                              { emergencyId, requestedBy, status: "requested"|"connected"|"ended"|"expired",
+                                offer, answer?, candidates: {tablet|supervisor: {pushId: json}},
+                                startedAt, endedAt?, expiresAt }
 /overrides/{studentId}/{id}   { command: "skip"|"reset"|"pause"|"resume", source: "voice"|"menu"|"dashboard",
                                 issuedBy, timestamp, consumed: bool }
 ```
@@ -28,12 +34,14 @@ All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`)
 - `sessions/$studentId`: `.indexOn: ["startedAt", "status"]`
 - `overrides/$studentId`: `.indexOn: ["consumed"]`
 - `nodeMetrics/$studentId/$sessionId`: `.indexOn: ["timestamp"]`
+- `emergencies/$studentId`: `.indexOn: ["status", "timestamp"]`
+- `interventions/$studentId`: `.indexOn: ["status"]`
 
 ## Write paths
 | Writer | Paths |
 |---|---|
-| Tablet (device uid) | `checkpointLogs`, `nodeMetrics`, `liveStatus`, `sessions`, `overrides` (voice/menu), set `overrides/*/consumed` |
-| Supervisor | `overrides` (dashboard source), `routes` (any supervisor publishes, admin deletes), `students` (admin) |
+| Tablet (device uid) | `checkpointLogs`, `nodeMetrics`, `liveStatus`, `sessions`, `overrides` (voice/menu), set `overrides/*/consumed`, create `emergencies`, set their `status`, write `interventions/*` `answer`, `status`, `endedAt`, tablet candidates |
+| Supervisor | `overrides` (dashboard source), `routes` (any supervisor publishes, admin deletes), `students` (admin), `emergencies/*` `status` and `acknowledgedBy`, create `interventions` for an open SOS with consent, then `status`, `endedAt`, supervisor candidates |
 | Admin only | `devices`, `supervisors` |
 
 ## Metrics derivation

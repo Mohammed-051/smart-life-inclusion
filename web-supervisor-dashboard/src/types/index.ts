@@ -42,6 +42,17 @@ export interface Session {
   wrongScanCount: number;
 }
 
+export type EmergencySource = 'audio' | 'imu' | 'sos';
+
+export interface Emergency {
+  id: string;
+  source: EmergencySource;
+  status: 'open' | 'acknowledged' | 'resolved';
+  acknowledgedBy?: string;
+  sessionId?: string;
+  timestamp: number;
+}
+
 /** One step attempt, appended by the tablet when the step ends. */
 export interface NodeMetric {
   id: string;

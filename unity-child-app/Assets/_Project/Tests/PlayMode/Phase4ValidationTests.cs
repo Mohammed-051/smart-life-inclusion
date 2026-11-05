@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
+using Unity.WebRTC;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -158,9 +159,120 @@ namespace SmartLife.Tests
             Assert.AreEqual("Paused", State());
         }
 
-        [Test]
-        [Ignore("NOT BUILT: no WebRTC or /emergencies code exists, so an emergency cannot escalate to a stream yet.")]
-        public void Emergency_EscalatesToWebRtc() => Assert.Fail("Replace when the WebRTC intervention exists.");
+        [UnityTest]
+        public IEnumerator Stream_WithVideo_ReachesSupervisorPeer_ThenReleasesCamera() => RunCall(allowVideo: true);
+
+        [UnityTest]
+        public IEnumerator Stream_OnPrivateRoute_NeverTouchesTheCamera() => RunCall(allowVideo: false);
+
+        [Serializable]
+        private class CandidateJson
+        {
+            public string candidate;
+            public string sdpMid;
+            public int sdpMLineIndex;
+        }
+
+        /// <summary>A real WebRTC call on this machine: this test plays the supervisor's browser.</summary>
+        private IEnumerator RunCall(bool allowVideo)
+        {
+            var cameraObject = new GameObject("TestCamera", typeof(Camera)) { tag = "MainCamera" };
+            var camera = cameraObject.GetComponent<Camera>();
+            Component stream = Add("SmartLife.Core.EmergencyStream");
+
+            RTCConfiguration config = default;
+            var supervisor = new RTCPeerConnection(ref config);
+            bool receivedVideo = false;
+            supervisor.OnTrack = e => receivedVideo |= e.Track is VideoStreamTrack;
+            var tabletBound = new List<string>();
+            supervisor.OnIceCandidate = c => tabletBound.Add(JsonUtility.ToJson(new CandidateJson
+            {
+                candidate = c.Candidate, sdpMid = c.SdpMid, sdpMLineIndex = c.SdpMLineIndex ?? 0,
+            }));
+            RTCDataChannel control = supervisor.CreateDataChannel("control");
+            supervisor.AddTransceiver(TrackKind.Video, new RTCRtpTransceiverInit { direction = RTCRtpTransceiverDirection.RecvOnly });
+            supervisor.AddTransceiver(TrackKind.Audio, new RTCRtpTransceiverInit { direction = RTCRtpTransceiverDirection.RecvOnly });
+
+            Assert.IsFalse((bool)Get(stream, "IsActive"), "Nothing may capture before a request is answered.");
+            Assert.IsNull(camera.targetTexture);
+
+            RTCSessionDescriptionAsyncOperation createOffer = supervisor.CreateOffer();
+            yield return createOffer;
+            RTCSessionDescription offer = createOffer.Desc;
+            yield return supervisor.SetLocalDescription(ref offer);
+
+            string answer = null;
+            Action<string> onAnswer = sdp => answer = sdp;
+            Action<string> onCandidate = json =>
+            {
+                var parsed = JsonUtility.FromJson<CandidateJson>(json);
+                supervisor.AddIceCandidate(new RTCIceCandidate(new RTCIceCandidateInit
+                {
+                    candidate = parsed.candidate, sdpMid = parsed.sdpMid, sdpMLineIndex = parsed.sdpMLineIndex,
+                }));
+            };
+            Call(stream, "Answer", offer.sdp, allowVideo, onAnswer, onCandidate);
+
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (answer == null && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsNotNull(answer, "The tablet should answer the offer.");
+
+            var description = new RTCSessionDescription { type = RTCSdpType.Answer, sdp = answer };
+            yield return supervisor.SetRemoteDescription(ref description);
+
+            int delivered = 0;
+            while (!(bool)Get(stream, "IsConnected") && Time.realtimeSinceStartup < deadline)
+            {
+                while (delivered < tabletBound.Count) Call(stream, "AddRemoteCandidate", tabletBound[delivered++]);
+                yield return null;
+            }
+            Assert.IsTrue((bool)Get(stream, "IsConnected"), "The two peers should connect.");
+
+            Assert.AreEqual(allowVideo, (bool)Get(stream, "IsSendingVideo"));
+            Assert.AreEqual(allowVideo, camera.targetTexture != null, "Only a video call may redirect the camera.");
+            Assert.AreEqual(allowVideo, receivedVideo, "The supervisor should get video only when it is allowed.");
+
+            Call(stream, "End");
+            Assert.IsFalse((bool)Get(stream, "IsActive"));
+            Assert.IsFalse((bool)Get(stream, "IsSendingVideo"), "Ending a call must release the camera.");
+            Assert.IsNull(camera.targetTexture, "The camera must draw to the screen again.");
+
+            control.Dispose();
+            supervisor.Close();
+            supervisor.Dispose();
+            Object.Destroy(cameraObject);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Mascot_SwapsPlaceholderPrimitives_WithState()
+        {
+            _host.SetActive(false); // Links must be in place before OnEnable subscribes.
+            Component mascot = Add("SmartLife.AR.MascotStateManager");
+            SetField(mascot, "stateMachine", _machine);
+            _host.SetActive(true);
+            yield return null;
+
+            var instruction = (GameObject)mascot.GetType().GetField("instructionModel", Any).GetValue(mascot);
+            var ambient = (GameObject)mascot.GetType().GetField("ambientModel", Any).GetValue(mascot);
+            Assert.IsNotNull(instruction, "A placeholder should be created when no model is assigned.");
+            Assert.IsNotNull(ambient);
+
+            StringAssert.Contains("Capsule", instruction.GetComponent<MeshFilter>().sharedMesh.name);
+            StringAssert.Contains("Sphere", ambient.GetComponent<MeshFilter>().sharedMesh.name);
+            StringAssert.StartsWith("Universal Render Pipeline", instruction.GetComponent<Renderer>().sharedMaterial.shader.name);
+            Assert.AreNotEqual(instruction.GetComponent<Renderer>().sharedMaterial.color, ambient.GetComponent<Renderer>().sharedMaterial.color);
+
+            Assert.IsTrue(instruction.activeSelf, "Awaiting shows the instruction model.");
+            Assert.IsFalse(ambient.activeSelf);
+
+            Call(_machine, "HandleMarker", "MK_SINK");
+            Assert.IsFalse(instruction.activeSelf);
+            Assert.IsTrue(ambient.activeSelf, "Active shows the ambient model.");
+
+            Object.Destroy(instruction);
+            Object.Destroy(ambient);
+        }
 
         private string State() => Get(_machine, "State").ToString();
 

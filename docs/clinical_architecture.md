@@ -292,8 +292,8 @@ Rules to add:
 
 ## 6. Open decisions
 
-1. Decide how streaming behaves in private spaces, since handwashing may happen in or near a washroom (for example audio-only by default on routes marked private).
+1. Decide how streaming behaves in private spaces, since handwashing may happen in or near a washroom. Until then every task is private by default, which means audio only (`TaskDefinition.privateSpace`).
 2. Confirm with the supervising teacher that a Help selection, and not opening a board, is what ends "autonomous".
 3. Choose an audio model, and calibrate all thresholds on the target tablet.
 4. Decide who publishes routines: teachers (rule change) or admins only.
-5. Spike `com.unity.webrtc` with Vuforia on Unity 6 before building the intervention.
+5. Test `com.unity.webrtc` 3.0.0 with Vuforia on the target tablet. Unity Editor loopback passes (`Phase4ValidationTests`), but no device test has run.
