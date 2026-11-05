@@ -26,12 +26,19 @@ namespace SmartLife.Telemetry
 
         /// <summary>
         /// Checks Firebase, then connects in the background so the child is never blocked. Any failure,
-        /// such as a missing config file or no signed-in device, leaves telemetry off with a warning.
+        /// such as a missing config file, leaves telemetry off with a warning. The uid comes from the
+        /// guardian sign-in, and database rules require it to match the /devices mapping for this student.
         /// </summary>
-        public void Init(string studentId)
+        public void Init(string studentId, string uid)
         {
             if (_initStarted) return;
+            if (string.IsNullOrEmpty(studentId) || string.IsNullOrEmpty(uid))
+            {
+                Debug.LogWarning("[Telemetry] Off: no signed-in device.", this);
+                return;
+            }
             _initStarted = true;
+            _uid = uid;
 
             FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(check =>
             {
@@ -49,15 +56,14 @@ namespace SmartLife.Telemetry
         {
             try
             {
-                _uid = FirebaseAuth.DefaultInstance.CurrentUser?.UserId;
-                // Database rules reject every unsigned write, so don't queue writes that can only fail.
-                if (_uid == null)
+                // Database rules reject a write from any other account, so don't queue writes that can only fail.
+                if (FirebaseAuth.DefaultInstance.CurrentUser?.UserId != _uid)
                 {
                     Debug.LogWarning("[Telemetry] Off: this device is not signed in to Firebase.", this);
                     return;
                 }
 
-                FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(true);
+                DatabaseSetup.Ensure();
                 _root = FirebaseDatabase.DefaultInstance.RootReference;
                 _studentId = studentId;
 
@@ -75,6 +81,7 @@ namespace SmartLife.Telemetry
         /// <summary>Open a new session row for the current task.</summary>
         public void StartSession()
         {
+            if (_root == null) return;
             var ses = _root.Child(DbPaths.Sessions(_studentId)).Push();
             _sessionId = ses.Key;
             _reached = _autonomous = 0;
@@ -87,6 +94,8 @@ namespace SmartLife.Telemetry
         /// <summary>Record a step event; same call is used for voice/dashboard override outcomes.</summary>
         public void IssueOverride(OverrideCommand cmd, string source)
         {
+            // A guardian can act while telemetry is off or still connecting. The local override already applied.
+            if (_root == null) return;
             _root.Child(DbPaths.Overrides(_studentId)).Push().SetValueAsync(new Dictionary<string, object> {
                 { "command", cmd.ToString().ToLowerInvariant() }, { "source", source },
                 { "issuedBy", _uid }, { "timestamp", ServerValue.Timestamp }, { "consumed", true }

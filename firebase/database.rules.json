@@ -25,7 +25,7 @@
     },
 
     "routes": {
-      ".read": "auth != null",
+      ".read": "auth != null && (root.child('devices/' + auth.uid).exists() || root.child('supervisors/' + auth.uid).exists())",
       "$routeId": {
         ".write": "auth != null && root.child('supervisors/' + auth.uid + '/role').val() === 'admin'"
       }
@@ -36,7 +36,7 @@
         ".indexOn": ["startedAt", "status"],
         ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin' || root.child('devices/' + auth.uid + '/studentId').val() === $studentId)",
         "$sessionId": {
-          ".write": "auth != null && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+          ".write": "auth != null && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
           ".validate": "newData.hasChildren(['routeId', 'startedAt', 'status'])",
           "routeId": { ".validate": "newData.isString()" },
           "startedAt": { ".validate": "newData.isNumber()" },
@@ -54,7 +54,7 @@
         ".indexOn": ["timestamp"],
         ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
         "$logId": {
-          ".write": "auth != null && !data.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
           ".validate": "newData.hasChildren(['studentId', 'sessionId', 'routeId', 'checkpointId', 'markerId', 'taskStatus', 'autonomous', 'deviceId', 'timestamp'])",
           "studentId": { ".validate": "newData.val() === $studentId" },
           "sessionId": { ".validate": "newData.isString()" },
@@ -73,11 +73,15 @@
     "liveStatus": {
       "$studentId": {
         ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
-        ".write": "auth != null && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+        ".write": "auth != null && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
         ".validate": "newData.hasChildren(['sessionId', 'routeId', 'checkpointId', 'progressPct', 'state', 'lastSeen'])",
+        "sessionId": { ".validate": "newData.isString()" },
+        "routeId": { ".validate": "newData.isString()" },
+        "checkpointId": { ".validate": "newData.isString()" },
         "progressPct": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
         "state": { ".validate": "newData.val().matches(/^(idle|awaiting|active|paused|complete)$/)" },
-        "lastSeen": { ".validate": "newData.val() === now" }
+        "lastSeen": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
       }
     },
 
@@ -86,7 +90,7 @@
         ".indexOn": ["consumed"],
         ".read": "auth != null && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
         "$id": {
-          ".write": "auth != null && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true)",
+          ".write": "auth != null && newData.exists() && (root.child('devices/' + auth.uid + '/studentId').val() === $studentId || root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true)",
           ".validate": "newData.hasChildren(['command', 'source', 'issuedBy', 'timestamp', 'consumed'])",
           "command": { ".validate": "newData.val().matches(/^(skip|reset|pause|resume)$/)" },
           "source": { ".validate": "newData.val().matches(/^(voice|menu|dashboard)$/)" },

@@ -25,11 +25,14 @@ Requirements while a stream runs:
 ## Auth
 - Firebase Auth email/password for supervisors; one dedicated account per tablet (mapped in `/devices/{uid}`).
 - Roles in `/supervisors/{uid}.role`; created by admin only (console or admin script), never self-assigned.
-- Guardian menu on tablet protected by 4-digit PIN (stored hashed locally, not in RTDB).
+- Guardian menu on tablet protected by 4-digit PIN: salted PBKDF2-SHA256 hash in local app storage, never in RTDB or source. Five wrong tries lock it for 30 s, doubling up to 15 min. A forgotten PIN needs the app's data cleared, followed by a new tablet sign-in.
+- The tablet account's password is typed by a guardian and goes only to Firebase Auth. The Firebase SDK keeps the session on the device, and later boots go straight to the task. Only the learner's opaque ID is cached.
+- Disable public email sign-up in the Firebase console if possible. Rules only trust accounts listed in `/devices` or `/supervisors`, so a self-registered account reads nothing.
 
 ## Database rules (see `firebase/database.rules.json`)
 - Default deny at root.
-- Tablet may write only its own `studentId` subtree; logs append-only and server-timestamped.
+- Tablet may write only its own `studentId` subtree; logs append-only and server-timestamped. Telemetry cannot be deleted through rules.
+- Routine data under `/routes` is readable only by accounts in `/devices` or `/supervisors`.
 - Supervisors read only students in their `students` map; admin reads all.
 - Validate types, enums, and field sets on every write (`$other: .validate false`).
 

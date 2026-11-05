@@ -1,12 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using SmartLife.Telemetry;
+using SmartLife.UI;
 using SmartLife.Voice;
 
 namespace SmartLife.Core
 {
     /// <summary>
-    /// Scene entry point. Initializes services, then starts the configured task so the state
-    /// machine leaves Idle and begins accepting markers. A missing service never stops the task.
+    /// Scene entry point. Passes the guardian gate first, then initializes services and starts the
+    /// configured task, so the state machine leaves Idle and begins accepting markers. A missing
+    /// service never stops the task. The gate needs no scene wiring: it is added here at runtime.
     /// </summary>
     [RequireComponent(typeof(TaskStateMachine))]
     public class SceneBootstrapper : MonoBehaviour
@@ -14,12 +18,14 @@ namespace SmartLife.Core
         [SerializeField] private TaskDefinition _taskDefinition;
         [SerializeField] private TelemetryService telemetry;
         [SerializeField] private VoiceCommandRouter voiceRouter;
-        // shortcut: fixed student, read it from /devices/{uid}.studentId once tablet sign-in exists.
-        [SerializeField] private string studentId = "stu_001";
+
+        private TaskStateMachine _machine;
+        private IDeviceAuth _auth;
+        private GuardianMenu _menu;
 
         private void Start()
         {
-            InitServices();
+            _machine = GetComponent<TaskStateMachine>();
 
             // Begin() would make InstructionCard read a prompt from a missing task, so stop here instead.
             if (_taskDefinition == null)
@@ -28,16 +34,55 @@ namespace SmartLife.Core
                 return;
             }
 
-            GetComponent<TaskStateMachine>().Begin(_taskDefinition);
+            if (telemetry == null || !telemetry.isActiveAndEnabled)
+            {
+                Debug.LogWarning("[SceneBootstrapper] TelemetryService is missing or disabled, so telemetry is off.", this);
+                StartTask(null);
+                return;
+            }
+
+            _auth = gameObject.AddComponent<DeviceAuthService>();
+            _menu = gameObject.AddComponent<GuardianMenu>();
+            _menu.Open(_auth, new GuardianPinStore(new PlayerPrefsStore()), StartTask);
         }
 
-        private void InitServices()
+        /// <summary>A null session means no sign-in: the task runs with telemetry off.</summary>
+        private void StartTask(DeviceSession session)
         {
-            if (telemetry != null && telemetry.isActiveAndEnabled) telemetry.Init(studentId);
-            else Debug.LogWarning("[SceneBootstrapper] TelemetryService is missing or disabled, so telemetry is off.", this);
+            if (session != null) telemetry.Init(session.StudentId, session.Uid);
+            else if (telemetry != null) Debug.LogWarning("[SceneBootstrapper] Not signed in, so telemetry is off.", this);
 
             if (voiceRouter != null && voiceRouter.isActiveAndEnabled) voiceRouter.Init(new NoOpVoiceRecognizer());
             else Debug.LogWarning("[SceneBootstrapper] VoiceCommandRouter is missing or disabled, so voice commands are off.", this);
+
+            _machine.Begin(_taskDefinition);
+            if (_menu != null) _menu.EnableMenuAccess(BuildMenu(session != null));
+        }
+
+        private List<GuardianMenu.MenuAction> BuildMenu(bool signedIn)
+        {
+            var actions = new List<GuardianMenu.MenuAction>
+            {
+                new GuardianMenu.MenuAction("Skip this step", () => Override(OverrideCommand.Skip)),
+                new GuardianMenu.MenuAction("Reset task", () => Override(OverrideCommand.Reset)),
+                new GuardianMenu.MenuAction("Pause", () => Override(OverrideCommand.Pause)),
+                new GuardianMenu.MenuAction("Resume", () => Override(OverrideCommand.Resume)),
+            };
+            if (signedIn) actions.Add(new GuardianMenu.MenuAction("Sign out this tablet", SignOut));
+            return actions;
+        }
+
+        private void Override(OverrideCommand command)
+        {
+            _machine.Apply(command);
+            if (telemetry != null) telemetry.IssueOverride(command, "menu");
+        }
+
+        private void SignOut()
+        {
+            _auth.SignOut();
+            PauseLock.Clear();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 }

@@ -54,7 +54,7 @@ namespace SmartLife.Tests
         }
 
         [Test]
-        public void VoiceRouter_AcceptsNoOpRecognizer()
+        public void VoiceRouter_AcceptsPlatformRecognizer()
         {
             var router = _host.AddComponent<VoiceCommandRouter>();
             router.Init(new NoOpVoiceRecognizer());
