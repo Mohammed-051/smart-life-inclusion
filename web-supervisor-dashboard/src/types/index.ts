@@ -2,6 +2,7 @@
 export type TaskStatus = 'started' | 'completed' | 'skipped' | 'reset' | 'paused' | 'resumed';
 export type MachineState = 'idle' | 'awaiting' | 'active' | 'paused' | 'complete';
 export type OverrideCommand = 'skip' | 'reset' | 'pause' | 'resume';
+export type AacRequest = 'too_loud' | 'need_help' | 'show_me' | 'break';
 
 export interface CheckpointLog {
   id: string;
@@ -24,6 +25,7 @@ export interface LiveStatus {
   state: MachineState;
   lastSeen: number;
   stepHesitationMs: number;
+  aacRequest?: AacRequest;
   wrongScanCount: number;
 }
 

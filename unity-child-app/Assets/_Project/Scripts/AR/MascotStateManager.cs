@@ -44,6 +44,23 @@ namespace SmartLife.AR
             };
         }
 
+        /// <summary>
+        /// "Show me" on the AAC board: back to the demonstrating model until the next state change.
+        /// Reads no state beyond the current step, and only on avatar steps, so arrows stay the single cue.
+        /// </summary>
+        public void ShowDemo()
+        {
+            var task = stateMachine.Task;
+            int step = stateMachine.StepIndex;
+            if (task == null || step >= task.Count || task[step].cue != TaskDefinition.Cue.Avatar) return;
+
+            if (instructionModel != null) instructionModel.SetActive(true);
+            if (ambientModel != null) ambientModel.SetActive(false);
+            if (Mode == MascotMode.Instruction) return;
+            Mode = MascotMode.Instruction;
+            OnModeChanged?.Invoke(Mode);
+        }
+
         private void HandleStateChanged(MachineState state, int stepIndex)
         {
             var task = stateMachine.Task;

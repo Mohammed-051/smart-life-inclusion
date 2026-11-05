@@ -22,6 +22,7 @@ export const liveStatusSchema = z.object({
   state: z.enum(['idle', 'awaiting', 'active', 'paused', 'complete']),
   lastSeen: z.number(),
   stepHesitationMs: z.number().min(0).default(0),
+  aacRequest: z.enum(['too_loud', 'need_help', 'show_me', 'break']).optional(),
   wrongScanCount: z.number().int().min(0).default(0),
 });
 

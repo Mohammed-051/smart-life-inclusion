@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SmartLife.AR;
 using SmartLife.Telemetry;
 using SmartLife.UI;
 using SmartLife.Voice;
@@ -22,6 +23,8 @@ namespace SmartLife.Core
         private TaskStateMachine _machine;
         private IDeviceAuth _auth;
         private GuardianMenu _menu;
+        private EmergencyDetector _emergency;
+        private bool _soundAlertsOn;
 
         private void Start()
         {
@@ -52,8 +55,13 @@ namespace SmartLife.Core
             if (session != null) telemetry.Init(session.StudentId, session.Uid);
             else if (telemetry != null) Debug.LogWarning("[SceneBootstrapper] Not signed in, so telemetry is off.", this);
 
-            if (voiceRouter != null && voiceRouter.isActiveAndEnabled) voiceRouter.Init(new NoOpVoiceRecognizer());
+            if (voiceRouter != null && voiceRouter.isActiveAndEnabled) voiceRouter.Init(new AndroidSpeechRecognizer());
             else Debug.LogWarning("[SceneBootstrapper] VoiceCommandRouter is missing or disabled, so voice commands are off.", this);
+
+            _emergency = GetComponent<EmergencyDetector>();
+            var hesitation = GetComponent<HesitationMonitor>();
+            if (hesitation != null)
+                gameObject.AddComponent<AacBoard>().Init(_machine, hesitation, telemetry, GetComponent<MascotStateManager>());
 
             if (session == null)
             {
@@ -78,8 +86,40 @@ namespace SmartLife.Core
                 new GuardianMenu.MenuAction("Pause", () => Override(OverrideCommand.Pause)),
                 new GuardianMenu.MenuAction("Resume", () => Override(OverrideCommand.Resume)),
             };
+            if (voiceRouter != null)
+                actions.Add(new GuardianMenu.MenuAction(() => voiceRouter.Enabled ? "Voice commands: on" : "Voice commands: off", ToggleVoice));
+            if (_emergency != null)
+                actions.Add(new GuardianMenu.MenuAction(() => _soundAlertsOn ? "Sound alerts: on" : "Sound alerts: off", ToggleSoundAlerts));
             if (signedIn) actions.Add(new GuardianMenu.MenuAction("Sign out this tablet", SignOut));
             return actions;
+        }
+
+        // Android's recognizer and Unity's Microphone can't share the mic, so these two switches exclude each other.
+        private void ToggleVoice()
+        {
+            bool turnOn = !voiceRouter.Enabled;
+            if (turnOn) SetSoundAlerts(false);
+            voiceRouter.SetEnabled(turnOn);
+        }
+
+        private void ToggleSoundAlerts()
+        {
+            bool turnOn = !_soundAlertsOn;
+            if (turnOn)
+            {
+                if (voiceRouter != null) voiceRouter.SetEnabled(false);
+                // The prompt appears now. The guardian switches this on again after allowing it.
+                if (!AndroidSpeechRecognizer.EnsureMicrophonePermission()) return;
+            }
+            SetSoundAlerts(turnOn);
+        }
+
+        private void SetSoundAlerts(bool on)
+        {
+            _soundAlertsOn = on;
+            if (_emergency == null) return;
+            if (on) _emergency.StartAudioMonitoring();
+            else _emergency.StopAudioMonitoring();
         }
 
         private void Override(OverrideCommand command)

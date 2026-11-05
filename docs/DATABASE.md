@@ -17,7 +17,8 @@ All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`)
                               { studentId, sessionId, routeId, checkpointId, markerId,
                                 taskStatus: "started"|"completed"|"skipped"|"reset"|"paused"|"resumed",
                                 autonomous: bool, deviceId, timestamp }
-/liveStatus/{studentId}       { sessionId, routeId, checkpointId, progressPct, state, lastSeen, stepHesitationMs?, wrongScanCount? }
+/liveStatus/{studentId}       { sessionId, routeId, checkpointId, progressPct, state, lastSeen, stepHesitationMs?, wrongScanCount?,
+                                aacRequest?: "too_loud"|"need_help"|"show_me"|"break" (current step only) }
 /overrides/{studentId}/{id}   { command: "skip"|"reset"|"pause"|"resume", source: "voice"|"menu"|"dashboard",
                                 issuedBy, timestamp, consumed: bool }
 ```

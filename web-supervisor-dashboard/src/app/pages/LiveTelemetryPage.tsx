@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { watchLiveStatus, watchNodeMetrics, watchRecentLogs, watchServerOffset, watchSessions } from '../../lib/services/checkpoints';
 import { autonomousPct, avgCompletionMs, formatDuration, sessionDurationMs, summarizeNodes } from '../../lib/services/metrics';
 import { useStudentId } from '../studentContext';
-import type { CheckpointLog, LiveStatus, NodeMetric, Session } from '../../types';
+import type { AacRequest, CheckpointLog, LiveStatus, NodeMetric, Session } from '../../types';
 
 const SESSION_WINDOW = 50;
 const STATE_CHIP: Record<LiveStatus['state'], string> = {
   idle: 'chip', awaiting: 'chip chip-go', active: 'chip chip-go', paused: 'chip chip-wait', complete: 'chip',
+};
+const AAC_LABEL: Record<AacRequest, string> = {
+  too_loud: 'Too loud', need_help: 'Need help', show_me: 'Show me', break: 'Break',
 };
 
 export function Component() {
@@ -66,6 +69,14 @@ function LiveTelemetry({ studentId }: { studentId: string }) {
         {live
           ? <span role="status" className={STATE_CHIP[live.state]}>Tablet: {live.state}</span>
           : <span role="status" className="chip">No live status yet</span>}
+        {live?.aacRequest && (
+          <>
+            {' '}
+            <span role="alert" className={live.aacRequest === 'need_help' ? 'chip chip-help' : 'chip chip-wait'}>
+              Learner chose: {AAC_LABEL[live.aacRequest]}
+            </span>
+          </>
+        )}
       </p>
 
       <section className="kpi-grid" aria-label="Current session">

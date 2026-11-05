@@ -116,7 +116,12 @@ namespace SmartLife.Telemetry
         public void RecordAacOpened() => _metrics.RecordAacOpened();
 
         /// <summary>The child chose a symbol. Saved as a short stable ID on the step's metrics.</summary>
-        public void RecordAacSelection(string selection) => _metrics.RecordAacSelection(selection);
+        public void RecordAacSelection(string selection)
+        {
+            _metrics.RecordAacSelection(selection);
+            // Right away, so a child's "Need help" reaches the dashboard while the step is still open.
+            if (_root != null && _sessionId != null) PushLiveStatus(stateMachine.State, stateMachine.StepIndex);
+        }
 
         private void Update()
         {
@@ -197,12 +202,14 @@ namespace SmartLife.Telemetry
 
             _nextLivePush = Time.time + LivePushSeconds;
             var step = stateMachine.Task[Mathf.Min(stepIndex, stateMachine.Task.Count - 1)];
-            _root.Child(DbPaths.LiveStatus(_studentId)).SetValueAsync(new Dictionary<string, object> {
+            var live = new Dictionary<string, object> {
                 { "sessionId", _sessionId }, { "routeId", stateMachine.Task.RouteId }, { "checkpointId", step.checkpointId },
                 { "progressPct", Mathf.RoundToInt(stateMachine.ProgressPct) }, { "state", state.ToString().ToLowerInvariant() },
                 { "stepHesitationMs", ToMs(_metrics.StepHesitationSeconds) }, { "wrongScanCount", _metrics.SessionWrongScans },
                 { "lastSeen", ServerValue.Timestamp }
-            }).ContinueWithOnMainThread(LogFault);
+            };
+            if (_metrics.StepAacSelection != null) live["aacRequest"] = _metrics.StepAacSelection;
+            _root.Child(DbPaths.LiveStatus(_studentId)).SetValueAsync(live).ContinueWithOnMainThread(LogFault);
 
             if (state == MachineState.Complete)
             {

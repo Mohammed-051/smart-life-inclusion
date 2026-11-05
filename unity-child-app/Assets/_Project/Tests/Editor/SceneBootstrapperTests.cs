@@ -57,7 +57,7 @@ namespace SmartLife.Tests
         public void VoiceRouter_AcceptsPlatformRecognizer()
         {
             var router = _host.AddComponent<VoiceCommandRouter>();
-            router.Init(new NoOpVoiceRecognizer());
+            router.Init(new AndroidSpeechRecognizer());
             Assert.DoesNotThrow(() => router.SetEnabled(true));
         }
     }

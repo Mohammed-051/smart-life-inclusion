@@ -6,6 +6,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace SmartLife.Tests
@@ -83,9 +84,47 @@ namespace SmartLife.Tests
             Assert.AreEqual(1, fired.Calls.Count, "OnHesitation should not repeat on its own.");
         }
 
-        [Test]
-        [Ignore("NOT BUILT: no AAC board exists to subscribe to OnHesitation, so no board can open yet.")]
-        public void Hesitation_OpensAacPictureBoard() => Assert.Fail("Replace when the AAC board UI exists.");
+        [UnityTest]
+        public IEnumerator Hesitation_OpensAacPictureBoard_FreezesTime_AndBreakPauses()
+        {
+            Component board = Add("SmartLife.UI.AacBoard");
+            Call(board, "Init", _machine, _hesitation, null, null);
+
+            Time.timeScale = 15f; // 15 simulated seconds in about 1 real second.
+            float deadline = Time.realtimeSinceStartup + 10f;
+            while (!(bool)Get(board, "IsOpen") && Time.realtimeSinceStartup < deadline) yield return null;
+
+            Assert.IsTrue((bool)Get(board, "IsOpen"), "The board should open when the 15 s timer expires.");
+            Assert.AreEqual(0f, Time.timeScale, "Opening the board should freeze the clock.");
+            foreach (string label in new[] { "Too loud", "Need help", "Show me" })
+                Assert.IsNotNull(GameObject.Find(label), $"The board should show {label}.");
+
+            GameObject breakButton = GameObject.Find("Break");
+            Assert.IsNotNull(breakButton, "The board should show Break.");
+            breakButton.GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual("Paused", State());
+            Assert.IsFalse((bool)Get(board, "IsOpen"));
+            Assert.AreEqual(1f, Time.timeScale, "Closing the board should restart the clock.");
+        }
+
+        [UnityTest]
+        public IEnumerator Emergency_StillDetectedWhileClockIsFrozen()
+        {
+            Recorder raised = Listen(_emergency, "OnEmergency");
+            Time.timeScale = 0f;
+            yield return null;
+
+            // Free fall then impact, as the accelerometer would report during an open AAC board.
+            float dt = Mathf.Max(Time.unscaledDeltaTime, 0.02f);
+            Call(_emergency, "FeedImu", 0.1f, 0.2f);
+            Call(_emergency, "FeedImu", 3f, dt);
+            yield return null;
+
+            Assert.AreEqual("Imu", raised.Calls[0].ToString());
+            Assert.Greater(Time.unscaledDeltaTime, 0f, "Detection reads the unscaled clock, which keeps running.");
+        }
 
         [UnityTest]
         public IEnumerator Emergency_AudioThresholdBreak_RaisesEmergencyAndPausesTask()

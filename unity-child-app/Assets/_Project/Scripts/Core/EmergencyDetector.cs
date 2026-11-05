@@ -67,7 +67,8 @@ namespace SmartLife.Core
 
         private void Update()
         {
-            float dt = Time.deltaTime;
+            // Unscaled, so detection keeps working while the AAC board or guardian menu freezes the clock.
+            float dt = Time.unscaledDeltaTime;
             if (_cooldown > 0f) _cooldown -= dt;
             FeedImu(Input.acceleration.magnitude, dt);
             if (_micClip != null && TryReadRms(out float rms)) FeedAudio(rms, dt);
