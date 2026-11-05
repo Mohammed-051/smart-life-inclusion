@@ -1,64 +1,273 @@
 {
   "students": {
-    "stu_001": { "alias": "Student A", "grade": "G3", "routeIds": { "rt_handwash": true, "rt_hall_a": true }, "active": true },
-    "stu_002": { "alias": "Student B", "grade": "G4", "routeIds": { "rt_trash": true, "rt_hall_a": true }, "active": true }
+    "stu_001": {
+      "alias": "Student A",
+      "grade": "G3",
+      "routeIds": {
+        "rt_handwash": true,
+        "rt_hall_a": true
+      },
+      "active": true
+    },
+    "stu_002": {
+      "alias": "Student B",
+      "grade": "G4",
+      "routeIds": {
+        "rt_trash": true,
+        "rt_hall_a": true
+      },
+      "active": true
+    }
   },
   "devices": {
-    "dev_uid_tablet01": { "studentId": "stu_001", "label": "Tablet 01" }
+    "dev_uid_tablet01": {
+      "studentId": "stu_001",
+      "label": "Tablet 01"
+    }
   },
   "supervisors": {
-    "sup_uid_teacher01": { "role": "teacher", "students": { "stu_001": true, "stu_002": true } },
-    "sup_uid_admin01": { "role": "admin", "students": {} }
+    "sup_uid_teacher01": {
+      "role": "teacher",
+      "students": {
+        "stu_001": true,
+        "stu_002": true
+      }
+    },
+    "sup_uid_admin01": {
+      "role": "admin",
+      "students": {}
+    }
   },
   "routes": {
     "rt_handwash": {
-      "name": "Handwashing", "kind": "adl",
+      "name": "Handwashing",
+      "kind": "adl",
       "checkpoints": {
-        "cp_wet":   { "order": 1, "markerId": "MK_SINK",   "label": "Wet your hands",  "cue": "avatar_wet" },
-        "cp_soap":  { "order": 2, "markerId": "MK_SOAP",   "label": "Take some soap",  "cue": "avatar_soap" },
-        "cp_rub":   { "order": 3, "markerId": "MK_RUB",    "label": "Rub for 20 seconds", "cue": "avatar_rub" },
-        "cp_rinse": { "order": 4, "markerId": "MK_TOWEL",  "label": "Rinse and dry",   "cue": "avatar_dry" }
-      }
+        "cp_wet": {
+          "order": 1,
+          "markerId": "MK_SINK",
+          "label": "Wet your hands",
+          "cue": "avatar_wet",
+          "enabled": true
+        },
+        "cp_soap": {
+          "order": 2,
+          "markerId": "MK_SOAP",
+          "label": "Take some soap",
+          "cue": "avatar_soap",
+          "enabled": true
+        },
+        "cp_rub": {
+          "order": 3,
+          "markerId": "MK_RUB",
+          "label": "Rub for 20 seconds",
+          "cue": "avatar_rub",
+          "enabled": true
+        },
+        "cp_rinse": {
+          "order": 4,
+          "markerId": "MK_TOWEL",
+          "label": "Rinse and dry",
+          "cue": "avatar_dry",
+          "enabled": true
+        }
+      },
+      "version": 1
     },
     "rt_trash": {
-      "name": "Trash sorting", "kind": "adl",
+      "name": "Trash sorting",
+      "kind": "adl",
       "checkpoints": {
-        "cp_pick":    { "order": 1, "markerId": "MK_ITEM",     "label": "Pick up the item", "cue": "avatar_pick" },
-        "cp_bin":     { "order": 2, "markerId": "MK_BIN_SIGN", "label": "Find the bin",     "cue": "avatar_point" },
-        "cp_drop":    { "order": 3, "markerId": "MK_BIN_LID",  "label": "Drop it in",       "cue": "avatar_drop" },
-        "cp_confirm": { "order": 4, "markerId": "MK_DONE",     "label": "All done",         "cue": "check" }
-      }
+        "cp_pick": {
+          "order": 1,
+          "markerId": "MK_ITEM",
+          "label": "Pick up the item",
+          "cue": "avatar_pick",
+          "enabled": true
+        },
+        "cp_bin": {
+          "order": 2,
+          "markerId": "MK_BIN_SIGN",
+          "label": "Find the bin",
+          "cue": "avatar_point",
+          "enabled": true
+        },
+        "cp_drop": {
+          "order": 3,
+          "markerId": "MK_BIN_LID",
+          "label": "Drop it in",
+          "cue": "avatar_drop",
+          "enabled": true
+        },
+        "cp_confirm": {
+          "order": 4,
+          "markerId": "MK_DONE",
+          "label": "All done",
+          "cue": "check",
+          "enabled": true
+        }
+      },
+      "version": 1
     },
     "rt_hall_a": {
-      "name": "Classroom to Washroom", "kind": "nav",
+      "name": "Classroom to Washroom",
+      "kind": "nav",
       "checkpoints": {
-        "cp_start":   { "order": 1, "markerId": "NAV_01", "label": "Classroom door", "cue": "arrow_straight" },
-        "cp_turn":    { "order": 2, "markerId": "NAV_02", "label": "Hall corner",    "cue": "arrow_left" },
-        "cp_stairs":  { "order": 3, "markerId": "NAV_03", "label": "Near stairs",    "cue": "arrow_right" },
-        "cp_arrive":  { "order": 4, "markerId": "NAV_04", "label": "Washroom",       "cue": "arrived" }
-      }
+        "cp_start": {
+          "order": 1,
+          "markerId": "NAV_01",
+          "label": "Classroom door",
+          "cue": "arrow_straight",
+          "enabled": true
+        },
+        "cp_turn": {
+          "order": 2,
+          "markerId": "NAV_02",
+          "label": "Hall corner",
+          "cue": "arrow_left",
+          "enabled": true
+        },
+        "cp_stairs": {
+          "order": 3,
+          "markerId": "NAV_03",
+          "label": "Near stairs",
+          "cue": "arrow_right",
+          "enabled": true
+        },
+        "cp_arrive": {
+          "order": 4,
+          "markerId": "NAV_04",
+          "label": "Washroom",
+          "cue": "arrived",
+          "enabled": true
+        }
+      },
+      "version": 1
     }
   },
   "sessions": {
     "stu_001": {
-      "ses_0001": { "routeId": "rt_hall_a", "startedAt": 1762160400000, "completedAt": 1762160580000, "status": "completed", "checkpointsReached": 4, "autonomousCount": 3 },
-      "ses_0002": { "routeId": "rt_handwash", "startedAt": 1762161000000, "completedAt": 1762161150000, "status": "completed", "checkpointsReached": 4, "autonomousCount": 4 }
+      "ses_0001": {
+        "routeId": "rt_hall_a",
+        "startedAt": 1762160400000,
+        "completedAt": 1762160580000,
+        "status": "completed",
+        "checkpointsReached": 4,
+        "autonomousCount": 3,
+        "activeDurationMs": 150000,
+        "hesitationTotalMs": 9000,
+        "wrongScanCount": 1
+      },
+      "ses_0002": {
+        "routeId": "rt_handwash",
+        "startedAt": 1762161000000,
+        "completedAt": 1762161150000,
+        "status": "completed",
+        "checkpointsReached": 4,
+        "autonomousCount": 4,
+        "activeDurationMs": 150000,
+        "hesitationTotalMs": 9000,
+        "wrongScanCount": 1
+      }
     }
   },
   "checkpointLogs": {
     "stu_001": {
-      "log_0001": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_start",  "markerId": "NAV_01", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160400000 },
-      "log_0002": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_turn",   "markerId": "NAV_02", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160460000 },
-      "log_0003": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_stairs", "markerId": "NAV_03", "taskStatus": "skipped",   "autonomous": false, "deviceId": "dev_uid_tablet01", "timestamp": 1762160520000 },
-      "log_0004": { "studentId": "stu_001", "sessionId": "ses_0001", "routeId": "rt_hall_a", "checkpointId": "cp_arrive", "markerId": "NAV_04", "taskStatus": "completed", "autonomous": true,  "deviceId": "dev_uid_tablet01", "timestamp": 1762160580000 }
+      "log_0001": {
+        "studentId": "stu_001",
+        "sessionId": "ses_0001",
+        "routeId": "rt_hall_a",
+        "checkpointId": "cp_start",
+        "markerId": "NAV_01",
+        "taskStatus": "completed",
+        "autonomous": true,
+        "deviceId": "dev_uid_tablet01",
+        "timestamp": 1762160400000
+      },
+      "log_0002": {
+        "studentId": "stu_001",
+        "sessionId": "ses_0001",
+        "routeId": "rt_hall_a",
+        "checkpointId": "cp_turn",
+        "markerId": "NAV_02",
+        "taskStatus": "completed",
+        "autonomous": true,
+        "deviceId": "dev_uid_tablet01",
+        "timestamp": 1762160460000
+      },
+      "log_0003": {
+        "studentId": "stu_001",
+        "sessionId": "ses_0001",
+        "routeId": "rt_hall_a",
+        "checkpointId": "cp_stairs",
+        "markerId": "NAV_03",
+        "taskStatus": "skipped",
+        "autonomous": false,
+        "deviceId": "dev_uid_tablet01",
+        "timestamp": 1762160520000
+      },
+      "log_0004": {
+        "studentId": "stu_001",
+        "sessionId": "ses_0001",
+        "routeId": "rt_hall_a",
+        "checkpointId": "cp_arrive",
+        "markerId": "NAV_04",
+        "taskStatus": "completed",
+        "autonomous": true,
+        "deviceId": "dev_uid_tablet01",
+        "timestamp": 1762160580000
+      }
     }
   },
   "liveStatus": {
-    "stu_001": { "sessionId": "ses_0002", "routeId": "rt_handwash", "checkpointId": "cp_rinse", "progressPct": 100, "state": "complete", "lastSeen": 1762161150000 }
+    "stu_001": {
+      "sessionId": "ses_0002",
+      "routeId": "rt_handwash",
+      "checkpointId": "cp_rinse",
+      "progressPct": 100,
+      "state": "complete",
+      "lastSeen": 1762161150000,
+      "stepHesitationMs": 0,
+      "wrongScanCount": 1
+    }
   },
   "overrides": {
     "stu_001": {
-      "ovr_0001": { "command": "skip", "source": "voice", "issuedBy": "dev_uid_tablet01", "timestamp": 1762160519000, "consumed": true }
+      "ovr_0001": {
+        "command": "skip",
+        "source": "voice",
+        "issuedBy": "dev_uid_tablet01",
+        "timestamp": 1762160519000,
+        "consumed": true
+      }
+    }
+  },
+  "nodeMetrics": {
+    "stu_001": {
+      "ses_0002": {
+        "nm_0001": {
+          "checkpointId": "cp_wet",
+          "stepIndex": 0,
+          "hesitationMs": 4000,
+          "holdMs": 0,
+          "wrongScans": 1,
+          "aacOpened": false,
+          "outcome": "completed",
+          "autonomous": true,
+          "timestamp": 1762161040000
+        },
+        "nm_0002": {
+          "checkpointId": "cp_soap",
+          "stepIndex": 1,
+          "hesitationMs": 5000,
+          "holdMs": 0,
+          "wrongScans": 0,
+          "aacOpened": false,
+          "outcome": "completed",
+          "autonomous": true,
+          "timestamp": 1762161080000
+        }
+      }
     }
   }
 }

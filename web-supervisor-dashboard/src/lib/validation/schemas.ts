@@ -21,6 +21,8 @@ export const liveStatusSchema = z.object({
   progressPct: z.number().min(0).max(100),
   state: z.enum(['idle', 'awaiting', 'active', 'paused', 'complete']),
   lastSeen: z.number(),
+  stepHesitationMs: z.number().min(0).default(0),
+  wrongScanCount: z.number().int().min(0).default(0),
 });
 
 export const sessionSchema = z.object({
@@ -30,4 +32,57 @@ export const sessionSchema = z.object({
   status: z.enum(['active', 'completed', 'aborted']),
   checkpointsReached: z.number().int().min(0).default(0),
   autonomousCount: z.number().int().min(0).default(0),
+  activeDurationMs: z.number().min(0).default(0),
+  hesitationTotalMs: z.number().min(0).default(0),
+  wrongScanCount: z.number().int().min(0).default(0),
+});
+
+export const nodeMetricSchema = z.object({
+  checkpointId: z.string().max(64),
+  stepIndex: z.number().int().min(0),
+  hesitationMs: z.number().min(0),
+  holdMs: z.number().min(0),
+  wrongScans: z.number().int().min(0),
+  aacOpened: z.boolean(),
+  aacSelection: z.string().max(32).optional(),
+  outcome: z.enum(['completed', 'skipped', 'reset']),
+  autonomous: z.boolean(),
+  timestamp: z.number(),
+});
+
+export const routeCheckpointSchema = z.object({
+  order: z.number().int().min(1),
+  markerId: z.string().min(1).max(64),
+  label: z.string().min(1).max(64),
+  cue: z.string().min(1).max(32),
+  enabled: z.boolean().default(true),
+  prompt: z.string().max(64).optional(),
+  holdSeconds: z.number().min(0).optional(),
+  aacBoardId: z.string().max(64).optional(),
+});
+
+/** Stored shape of /routes/{routeId}. Publishing adds the stricter checks in routinePayloadSchema. */
+export const routeSchema = z.object({
+  name: z.string().min(1).max(64),
+  kind: z.enum(['adl', 'nav']),
+  version: z.number().int().min(0).default(0),
+  checkpoints: z.record(z.string().max(64), routeCheckpointSchema),
+});
+
+export const routinePayloadSchema = routeSchema.superRefine((route, ctx) => {
+  const steps = Object.values(route.checkpoints);
+  if (!steps.some((s) => s.enabled)) {
+    ctx.addIssue({ code: 'custom', message: 'Turn on at least one step.' });
+  }
+
+  // The state machine needs one marker per transition, so two steps cannot share a marker.
+  const enabledMarkers = steps.filter((s) => s.enabled).map((s) => s.markerId);
+  if (new Set(enabledMarkers).size !== enabledMarkers.length) {
+    ctx.addIssue({ code: 'custom', message: 'Two active steps use the same marker.' });
+  }
+
+  const orders = steps.map((s) => s.order).sort((a, b) => a - b);
+  if (orders.some((order, i) => order !== i + 1)) {
+    ctx.addIssue({ code: 'custom', message: 'Step order must run from 1 with no gaps.' });
+  }
 });

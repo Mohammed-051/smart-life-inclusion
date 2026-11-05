@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SmartLife.Core
@@ -32,5 +33,48 @@ namespace SmartLife.Core
         public Kind TaskKind => kind;
         public int Count => steps.Length;
         public Step this[int i] => steps[i];
+
+        /// <summary>
+        /// A copy of this task arranged by a routine from the Routine Builder: only listed, enabled
+        /// steps, by order. The published routine changes order and on/off only, so prompts, markers
+        /// and demo clips stay authored here. Returns this task when nothing would be left to do.
+        /// </summary>
+        public TaskDefinition Arranged(IReadOnlyList<RoutineEntry> routine)
+        {
+            if (routine == null) return this;
+
+            var enabled = new List<RoutineEntry>();
+            foreach (RoutineEntry entry in routine)
+                if (entry.Enabled) enabled.Add(entry);
+            enabled.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+            var arranged = new List<Step>();
+            foreach (RoutineEntry entry in enabled)
+                foreach (Step step in steps)
+                    if (step.checkpointId == entry.CheckpointId) arranged.Add(step);
+            if (arranged.Count == 0) return this;
+
+            var copy = CreateInstance<TaskDefinition>();
+            copy.name = name;
+            copy.routeId = routeId;
+            copy.kind = kind;
+            copy.steps = arranged.ToArray();
+            return copy;
+        }
+    }
+
+    /// <summary>One checkpoint's place in a routine published to /routes.</summary>
+    public readonly struct RoutineEntry
+    {
+        public readonly string CheckpointId;
+        public readonly int Order;
+        public readonly bool Enabled;
+
+        public RoutineEntry(string checkpointId, int order, bool enabled)
+        {
+            CheckpointId = checkpointId;
+            Order = order;
+            Enabled = enabled;
+        }
     }
 }

@@ -7,6 +7,8 @@ namespace SmartLife.Telemetry
         public static string LiveStatus(string studentId) => $"liveStatus/{studentId}";
         public static string Sessions(string studentId) => $"sessions/{studentId}";
         public static string Overrides(string studentId) => $"overrides/{studentId}";
+        public static string NodeMetrics(string studentId, string sessionId) => $"nodeMetrics/{studentId}/{sessionId}";
+        public static string RouteCheckpoints(string routeId) => $"routes/{routeId}/checkpoints";
         public static string Device(string uid) => $"devices/{uid}";
         public static string DeviceStudent(string uid) => $"devices/{uid}/studentId";
     }

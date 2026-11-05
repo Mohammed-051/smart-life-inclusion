@@ -27,7 +27,26 @@
     "routes": {
       ".read": "auth != null && (root.child('devices/' + auth.uid).exists() || root.child('supervisors/' + auth.uid).exists())",
       "$routeId": {
-        ".write": "auth != null && root.child('supervisors/' + auth.uid + '/role').val() === 'admin'"
+        ".write": "auth != null && (root.child('supervisors/' + auth.uid + '/role').val() === 'admin' || (newData.exists() && root.child('supervisors/' + auth.uid + '/role').exists()))",
+        ".validate": "newData.hasChildren(['name', 'kind', 'checkpoints'])",
+        "name": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        "kind": { ".validate": "newData.val().matches(/^(adl|nav)$/)" },
+        "version": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "checkpoints": {
+          "$checkpointId": {
+            ".validate": "newData.hasChildren(['order', 'markerId', 'label', 'cue'])",
+            "order": { ".validate": "newData.isNumber() && newData.val() >= 1" },
+            "markerId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "label": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "cue": { ".validate": "newData.isString() && newData.val().length <= 32" },
+            "enabled": { ".validate": "newData.isBoolean()" },
+            "prompt": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "holdSeconds": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "aacBoardId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
       }
     },
 
@@ -44,6 +63,9 @@
           "status": { ".validate": "newData.val().matches(/^(active|completed|aborted)$/)" },
           "checkpointsReached": { ".validate": "newData.isNumber() && newData.val() >= 0" },
           "autonomousCount": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "activeDurationMs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "hesitationTotalMs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "wrongScanCount": { ".validate": "newData.isNumber() && newData.val() >= 0" },
           "$other": { ".validate": false }
         }
       }
@@ -70,6 +92,30 @@
       }
     },
 
+    "nodeMetrics": {
+      "$studentId": {
+        ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
+        "$sessionId": {
+          ".indexOn": ["timestamp"],
+          "$metricId": {
+            ".write": "auth != null && !data.exists() && newData.exists() && root.child('devices/' + auth.uid + '/studentId').val() === $studentId",
+            ".validate": "newData.hasChildren(['checkpointId', 'stepIndex', 'hesitationMs', 'holdMs', 'wrongScans', 'aacOpened', 'outcome', 'autonomous', 'timestamp'])",
+            "checkpointId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "stepIndex": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "hesitationMs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "holdMs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "wrongScans": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "aacOpened": { ".validate": "newData.isBoolean()" },
+            "aacSelection": { ".validate": "newData.isString() && newData.val().length <= 32" },
+            "outcome": { ".validate": "newData.val().matches(/^(completed|skipped|reset)$/)" },
+            "autonomous": { ".validate": "newData.isBoolean()" },
+            "timestamp": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
+
     "liveStatus": {
       "$studentId": {
         ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
@@ -81,6 +127,8 @@
         "progressPct": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
         "state": { ".validate": "newData.val().matches(/^(idle|awaiting|active|paused|complete)$/)" },
         "lastSeen": { ".validate": "newData.val() === now" },
+        "stepHesitationMs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "wrongScanCount": { ".validate": "newData.isNumber() && newData.val() >= 0" },
         "$other": { ".validate": false }
       }
     },

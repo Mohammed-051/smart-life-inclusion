@@ -91,3 +91,40 @@ describe('roles', () => {
     expect(canRead(ADMIN, '/liveStatus/stu_001', data)).toBe(true);
   });
 });
+
+describe('routine publishing', () => {
+  const route = { name: 'Handwashing', kind: 'adl', version: 2, checkpoints: { cp_wet: { order: 1, markerId: 'MK_SINK', label: 'Wet', cue: 'avatar_wet', enabled: false } } };
+
+  it('lets a supervisor publish, but not a tablet or a stranger', () => {
+    expect(canWrite(TEACHER, '/routes/rt_handwash', route)).toBe(true);
+    expect(canWrite(TABLET, '/routes/rt_handwash', route)).toBe(false);
+    expect(canWrite(STRANGER, '/routes/rt_handwash', route)).toBe(false);
+    expect(canWrite(null, '/routes/rt_handwash', route)).toBe(false);
+  });
+
+  it('leaves deleting to an admin', () => {
+    expect(canWrite(TEACHER, '/routes/rt_handwash', null)).toBe(false);
+    expect(canWrite(ADMIN, '/routes/rt_handwash', null)).toBe(true);
+  });
+
+  it('rejects unknown fields and a bad kind', () => {
+    expect(canWrite(TEACHER, '/routes/rt_handwash', { ...route, secret: 1 })).toBe(false);
+    expect(canWrite(TEACHER, '/routes/rt_handwash', { ...route, kind: 'other' })).toBe(false);
+  });
+});
+
+describe('node metrics', () => {
+  const metric = { checkpointId: 'cp_wet', stepIndex: 0, hesitationMs: 10, holdMs: 0, wrongScans: 1, aacOpened: false, outcome: 'completed', autonomous: true, timestamp: NOW };
+
+  it('are appended by the mapped tablet only', () => {
+    expect(canWrite(TABLET, '/nodeMetrics/stu_001/s1/new', metric)).toBe(true);
+    expect(canWrite(TABLET, '/nodeMetrics/stu_002/s1/new', metric)).toBe(false);
+    expect(canWrite(TEACHER, '/nodeMetrics/stu_001/s1/new', metric)).toBe(false);
+    expect(canWrite(TABLET, '/nodeMetrics/stu_001/ses_0002/nm_0001', metric)).toBe(false);
+  });
+
+  it('are readable by the assigned supervisor, not anonymously', () => {
+    expect(canRead(TEACHER, '/nodeMetrics/stu_001/ses_0002')).toBe(true);
+    expect(canRead(null, '/nodeMetrics/stu_001/ses_0002')).toBe(false);
+  });
+});

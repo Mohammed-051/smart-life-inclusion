@@ -55,8 +55,18 @@ namespace SmartLife.Core
             if (voiceRouter != null && voiceRouter.isActiveAndEnabled) voiceRouter.Init(new NoOpVoiceRecognizer());
             else Debug.LogWarning("[SceneBootstrapper] VoiceCommandRouter is missing or disabled, so voice commands are off.", this);
 
-            _machine.Begin(_taskDefinition);
-            if (_menu != null) _menu.EnableMenuAccess(BuildMenu(session != null));
+            if (session == null)
+            {
+                BeginTask(_taskDefinition, false);
+                return;
+            }
+            _auth.FetchRoutine(_taskDefinition.RouteId, routine => BeginTask(_taskDefinition.Arranged(routine), true));
+        }
+
+        private void BeginTask(TaskDefinition task, bool signedIn)
+        {
+            _machine.Begin(task);
+            if (_menu != null) _menu.EnableMenuAccess(BuildMenu(signedIn));
         }
 
         private List<GuardianMenu.MenuAction> BuildMenu(bool signedIn)

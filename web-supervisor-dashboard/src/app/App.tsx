@@ -42,6 +42,7 @@ const router = createBrowserRouter([
     children: [
       {
         errorElement: <PageError />,
+        lazy: () => import('./AuthedShell'),
         children: [
           { index: true, element: <Navigate to="/telemetry" replace /> },
           { path: 'routines', lazy: () => import('./pages/RoutineBuilderPage') },

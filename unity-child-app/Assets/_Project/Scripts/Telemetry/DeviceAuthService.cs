@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
@@ -28,6 +29,8 @@ namespace SmartLife.Telemetry
         /// <summary>Returns a session, or null plus a guardian-readable message.</summary>
         void SignIn(string email, string password, Action<DeviceSession, string> done);
         void SignOut();
+        /// <summary>The published routine for this route, or null if it cannot be read in time.</summary>
+        void FetchRoutine(string routeId, Action<IReadOnlyList<RoutineEntry>> done);
     }
 
     /// <summary>Applies RTDB settings that must be set before the first database call.</summary>
@@ -52,6 +55,7 @@ namespace SmartLife.Telemetry
         private const string StudentKeyPrefix = "smartlife.device.studentId.";
         private const float RestoreWaitSeconds = 2f;
         private const int LookupTimeoutMs = 8000;
+        private const int RoutineTimeoutMs = 3000;
 
         private readonly IKeyValueStore _store = new PlayerPrefsStore();
 
@@ -120,6 +124,44 @@ namespace SmartLife.Telemetry
             string uid = FirebaseAuth.DefaultInstance.CurrentUser?.UserId;
             if (uid != null) _store.Delete(StudentKeyPrefix + uid);
             FirebaseAuth.DefaultInstance.SignOut();
+        }
+
+        // A short wait: the learner is looking at the app, and the authored task is a safe fallback.
+        public void FetchRoutine(string routeId, Action<IReadOnlyList<RoutineEntry>> done)
+        {
+            Task<DataSnapshot> read;
+            try
+            {
+                DatabaseSetup.Ensure();
+                read = FirebaseDatabase.DefaultInstance.RootReference.Child(DbPaths.RouteCheckpoints(routeId)).GetValueAsync();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DeviceAuth] Using the built-in routine. {e.GetType().Name}", this);
+                done(null);
+                return;
+            }
+
+            Task.WhenAny(read, Task.Delay(RoutineTimeoutMs)).ContinueWithOnMainThread(first =>
+            {
+                if (this == null) return;
+                if (first.Result != read || read.IsFaulted || read.IsCanceled || !read.Result.Exists)
+                {
+                    Debug.LogWarning("[DeviceAuth] Using the built-in routine: the published one could not be read.", this);
+                    done(null);
+                    return;
+                }
+
+                var entries = new List<RoutineEntry>();
+                foreach (DataSnapshot checkpoint in read.Result.Children)
+                {
+                    object order = checkpoint.Child("order").Value;
+                    if (order == null) continue;
+                    bool enabled = !(checkpoint.Child("enabled").Value is bool on) || on;
+                    entries.Add(new RoutineEntry(checkpoint.Key, Convert.ToInt32(order), enabled));
+                }
+                done(entries);
+            });
         }
 
         // The cached ID lets the tablet boot straight into the task while offline. An RTDB read with

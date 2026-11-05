@@ -21,6 +21,61 @@
 .kpi-label { color: var(--muted); font-size: 14px; }
 .kpi-value { font-size: 28px; font-weight: 600; overflow-wrap: anywhere; }
 
+.panel { padding: var(--space); border-radius: var(--radius); background: var(--surface); margin-top: var(--space); }
+.muted { color: var(--muted); font-size: 14px; }
+
+.form { display: flex; flex-direction: column; gap: 12px; max-width: 420px; }
+.form label { display: flex; flex-direction: column; gap: 4px; }
+input[type='email'], input[type='password'], select {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.btn-go { background: var(--go); border-color: var(--go); font-weight: 600; }
+.btn-help { background: var(--help); border-color: var(--help); font-weight: 600; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.chip { display: inline-block; padding: 4px 12px; margin: 4px 0; border-radius: var(--radius); background: var(--surface); }
+.chip-go { background: var(--go); }
+.chip-wait { background: var(--wait); }
+.chip-help { background: var(--help); }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: var(--space); }
+.toolbar-start { justify-content: flex-start; margin-top: var(--space); }
+
+.field { display: block; margin-bottom: var(--space); }
+.step-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.step { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius); background: var(--surface); }
+.step-off { background: transparent; border: 1px dashed var(--muted); }
+.step-dragging { position: relative; z-index: 1; box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 25%, transparent); }
+.step-handle { touch-action: none; cursor: grab; }
+.step-body { flex: 1 1 160px; display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.step-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; min-width: 64px; }
+.toggle input { width: 20px; height: 20px; }
+.payload { margin: 8px 0 0; overflow-x: auto; font-size: 13px; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--bg); }
+
 @media (min-width: 768px) {
   .shell { flex-direction: row; }
   .shell-nav { flex: 0 0 240px; }
