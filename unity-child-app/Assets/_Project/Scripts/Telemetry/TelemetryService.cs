@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
@@ -20,18 +21,55 @@ namespace SmartLife.Telemetry
         private string _sessionId;
         private string _uid;
         private int _reached, _autonomous;
+        private Query _pendingOverrides;
+        private bool _initStarted;
 
-        /// <summary>Call after FirebaseApp.CheckAndFixDependenciesAsync succeeds and the device is signed in.</summary>
+        /// <summary>
+        /// Checks Firebase, then connects in the background so the child is never blocked. Any failure,
+        /// such as a missing config file or no signed-in device, leaves telemetry off with a warning.
+        /// </summary>
         public void Init(string studentId)
         {
-            FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(true);
-            _root = FirebaseDatabase.DefaultInstance.RootReference;
-            _uid = FirebaseAuth.DefaultInstance.CurrentUser?.UserId;
-            _studentId = studentId;
+            if (_initStarted) return;
+            _initStarted = true;
 
-            stateMachine.OnStepEvent += LogStep;
-            stateMachine.OnStateChanged += PushLiveStatus;
-            _root.Child(DbPaths.Overrides(_studentId)).OrderByChild("consumed").EqualTo(false).ChildAdded += OnOverride;
+            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(check =>
+            {
+                if (this == null) return;
+                if (!check.IsCompletedSuccessfully || check.Result != DependencyStatus.Available)
+                {
+                    Debug.LogWarning($"[Telemetry] Off: Firebase is not available ({(check.IsCompletedSuccessfully ? check.Result.ToString() : "check failed")}).", this);
+                    return;
+                }
+                Connect(studentId);
+            });
+        }
+
+        private void Connect(string studentId)
+        {
+            try
+            {
+                _uid = FirebaseAuth.DefaultInstance.CurrentUser?.UserId;
+                // Database rules reject every unsigned write, so don't queue writes that can only fail.
+                if (_uid == null)
+                {
+                    Debug.LogWarning("[Telemetry] Off: this device is not signed in to Firebase.", this);
+                    return;
+                }
+
+                FirebaseDatabase.DefaultInstance.SetPersistenceEnabled(true);
+                _root = FirebaseDatabase.DefaultInstance.RootReference;
+                _studentId = studentId;
+
+                stateMachine.OnStepEvent += LogStep;
+                stateMachine.OnStateChanged += PushLiveStatus;
+                _pendingOverrides = _root.Child(DbPaths.Overrides(_studentId)).OrderByChild("consumed").EqualTo(false);
+                _pendingOverrides.ChildAdded += OnOverride;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[Telemetry] Off: could not connect to Firebase. {e.Message}", this);
+            }
         }
 
         /// <summary>Open a new session row for the current task.</summary>
@@ -112,6 +150,7 @@ namespace SmartLife.Telemetry
 
         private void OnDestroy()
         {
+            if (_pendingOverrides != null) _pendingOverrides.ChildAdded -= OnOverride;
             if (stateMachine == null) return;
             stateMachine.OnStepEvent -= LogStep;
             stateMachine.OnStateChanged -= PushLiveStatus;

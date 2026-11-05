@@ -6,6 +6,8 @@ google-services.json
 GoogleService-Info.plist
 *service-account*.json
 **/VuforiaLicense*.txt
+unity-child-app/Assets/Resources/VuforiaConfiguration.asset
+unity-child-app/Assets/Resources/VuforiaConfiguration.asset.meta
 .claude/settings.local.json
 
 # ---- OS / IDE ----
@@ -34,6 +36,7 @@ unity-child-app/*.apk
 unity-child-app/*.aab
 unity-child-app/crashlytics-build.properties
 unity-child-app/Assets/StreamingAssets/aa*
+unity-child-app/QCAR/
 
 # ---- Blender ----
 *.blend1

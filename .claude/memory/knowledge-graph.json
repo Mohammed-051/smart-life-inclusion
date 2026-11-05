@@ -1,6 +1,14 @@
 {
  "entities": [
   {
+   "name": "ADL_HandwashingScene",
+   "entityType": "scene",
+   "observations": [
+    "Assets/_Project/Scenes/ADL_Handwashing.unity",
+    "main scene; GameController runs ADL_Handwashing task"
+   ]
+  },
+  {
    "name": "BlenderAssets",
    "entityType": "module",
    "observations": [
@@ -143,6 +151,14 @@
    ]
   },
   {
+   "name": "NoOpVoiceRecognizer",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Voice/NoOpVoiceRecognizer.cs",
+    "placeholder IVoiceRecognizer; hears nothing"
+   ]
+  },
+  {
    "name": "Parvez",
    "entityType": "person",
    "observations": [
@@ -151,11 +167,27 @@
    ]
   },
   {
+   "name": "Phase4AutoWirer",
+   "entityType": "unity_script",
+   "observations": [
+    "Assets/Editor/Phase4AutoWirer.cs",
+    "CLI scene wiring and saved-scene verification"
+   ]
+  },
+  {
    "name": "RoutineBuilderPage",
    "entityType": "web_component",
    "observations": [
     "src/app/pages/RoutineBuilderPage.tsx",
     "placeholder route /routines"
+   ]
+  },
+  {
+   "name": "SceneBootstrapper",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/SceneBootstrapper.cs",
+    "inits telemetry and voice, then starts the task"
    ]
   },
   {
@@ -514,6 +546,56 @@
    "from": "EmergencyInterventionPage",
    "to": "SecurityPolicy",
    "relationType": "specified_in"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "TelemetryService",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "VoiceCommandRouter",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "NoOpVoiceRecognizer",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "NoOpVoiceRecognizer",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "ADL_HandwashingScene",
+   "to": "ChildApp",
+   "relationType": "part_of"
+  },
+  {
+   "from": "ADL_HandwashingScene",
+   "to": "SceneBootstrapper",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "ADL_HandwashingScene",
+   "to": "MascotStateManager",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "Phase4AutoWirer",
+   "to": "ADL_HandwashingScene",
+   "relationType": "writes_to"
   }
  ]
 }
