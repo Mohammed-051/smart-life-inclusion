@@ -19,7 +19,7 @@ How to build the V1 Android APK and prove AR tracking works on the physical tabl
 - Morning Routine cards (7): `MK_BED`, `NAV_TO_BATH`, `MK_TOILET`, `MK_SINK`, `MK_TOOTHBRUSH`, `NAV_TO_BED`, `MK_WARDROBE` in `docs/markers/`.
   Place: bed card by the bed, `NAV_TO_BATH` in the hallway facing the learner on the way to the bathroom, toilet card by the toilet, sink card above the sink, toothbrush card by the cup, `NAV_TO_BED` in the hallway on the way back, wardrobe card on the wardrobe.
 - The standalone handwashing scene also uses `MK_SOAP`, `MK_RUB` and `MK_TOWEL`.
-- Print each one **exactly 18 cm wide** (100% scale, no "fit to page"). The app is told the cards are 0.18 m wide; a different size makes tracking unstable.
+- Print each one **exactly 18 cm wide**. The PNGs carry no DPI, so "100% scale" does not fix the size: place each image in a page-layout tool (Word, Google Docs, an image editor's print dialog) and set its width to 18 cm explicitly, then measure the printed card with a ruler. The app is told the cards are 0.18 m wide; a different size makes tracking unstable.
 - Matte paper, no lamination glare. Mount them flat on stiff card.
 - The app builds its Image Targets from the same images at start (`ImageTargetRegistry`), so there is no Vuforia database to download.
 - To add or change markers: edit `MARKERS` in `tools/markers/generate_markers.py`, run `python -I tools/markers/generate_markers.py`, reprint, and commit every generated file.

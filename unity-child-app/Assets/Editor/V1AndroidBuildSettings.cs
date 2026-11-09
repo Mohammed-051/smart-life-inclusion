@@ -75,10 +75,14 @@ namespace SmartLife.EditorTools
                 SerializedProperty level = levels.GetArrayElementAtIndex(i);
                 int aa = level.FindPropertyRelative("antiAliasing").intValue;
                 if (aa != 0) problems.Add($"Quality level '{level.FindPropertyRelative("name").stringValue}' has anti-aliasing {aa}, expected 0.");
+
+                // A level's own pipeline asset overrides the global one, so its MSAA counts too.
+                if (QualitySettings.GetRenderPipelineAssetAt(i) is UniversalRenderPipelineAsset levelUrp && levelUrp.msaaSampleCount > 1)
+                    problems.Add($"URP asset '{levelUrp.name}' on quality level '{level.FindPropertyRelative("name").stringValue}' has MSAA {levelUrp.msaaSampleCount}x, expected off.");
             }
 
             if (GraphicsSettings.defaultRenderPipeline is UniversalRenderPipelineAsset urp && urp.msaaSampleCount > 1)
-                problems.Add($"URP asset '{urp.name}' has MSAA {urp.msaaSampleCount}x, expected off.");
+                problems.Add($"Default URP asset '{urp.name}' has MSAA {urp.msaaSampleCount}x, expected off.");
 
             return problems;
         }
