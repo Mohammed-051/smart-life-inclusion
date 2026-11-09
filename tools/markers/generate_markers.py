@@ -19,7 +19,12 @@ import sys
 import zlib
 from pathlib import Path
 
-MARKERS = ["MK_SINK", "MK_SOAP", "MK_RUB", "MK_TOWEL"]  # Must match TaskDefinition markerIds.
+MARKERS = [
+    # V1 Morning Routine (Data/MorningRoutine)
+    "MK_BED", "NAV_TO_BATH", "MK_TOILET", "MK_SINK", "MK_TOOTHBRUSH", "NAV_TO_BED", "MK_WARDROBE",
+    # Standalone handwashing task (Data/ADL_Handwashing)
+    "MK_SOAP", "MK_RUB", "MK_TOWEL",
+]  # Must cover every TaskDefinition markerId.
 PRINTED_WIDTH_METERS = 0.18  # Print each card exactly 18 cm wide, or tracking scale is wrong.
 
 WIDTH, HEIGHT = 1200, 900  # 4:3; Vuforia accepts up to 2048 px per side.

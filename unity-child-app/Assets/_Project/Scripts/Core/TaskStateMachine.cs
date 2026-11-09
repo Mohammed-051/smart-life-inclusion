@@ -66,8 +66,8 @@ namespace SmartLife.Core
                 _holdTimer = expected.holdSeconds;
                 OnStepEvent?.Invoke(StepIndex, TaskStatus.Started, !_assistedThisStep);
                 SetState(MachineState.Active);
-                // Navigation checkpoints complete on arrival.
-                if (task.TaskKind == TaskDefinition.Kind.Nav) CompleteStep();
+                // Navigation checkpoints complete on arrival, including hallway arrows inside a routine.
+                if (task.TaskKind == TaskDefinition.Kind.Nav || TaskDefinition.IsArrival(expected.cue)) CompleteStep();
             }
         }
 

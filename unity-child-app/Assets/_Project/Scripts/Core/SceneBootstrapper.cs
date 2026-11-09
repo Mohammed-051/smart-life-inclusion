@@ -17,6 +17,8 @@ namespace SmartLife.Core
     public class SceneBootstrapper : MonoBehaviour
     {
         [SerializeField] private TaskDefinition _taskDefinition;
+        [Tooltip("When set, runs this routine one scene per step instead of the single task above")]
+        [SerializeField] private RoutineDefinition _routine;
         [SerializeField] private TelemetryService telemetry;
         [SerializeField] private VoiceCommandRouter voiceRouter;
 
@@ -26,6 +28,10 @@ namespace SmartLife.Core
         private EmergencyDetector _emergency;
         private EmergencyCoordinator _emergencies;
         private bool _soundAlertsOn;
+        private HesitationMonitor _hesitation;
+        private AacBoard _aac;
+
+        private bool PrivateSpace => _routine != null ? _routine.PrivateSpace : _taskDefinition.PrivateSpace;
 
         private void Start()
         {
@@ -35,9 +41,9 @@ namespace SmartLife.Core
             gameObject.AddComponent<ImageTargetRegistry>().Init(_machine);
 
             // Begin() would make InstructionCard read a prompt from a missing task, so stop here instead.
-            if (_taskDefinition == null)
+            if (_taskDefinition == null && _routine == null)
             {
-                Debug.LogError("[SceneBootstrapper] Assign a TaskDefinition before entering Play mode.", this);
+                Debug.LogError("[SceneBootstrapper] Assign a TaskDefinition or a RoutineDefinition before entering Play mode.", this);
                 return;
             }
 
@@ -66,12 +72,22 @@ namespace SmartLife.Core
             if (_emergency != null)
             {
                 _emergencies = gameObject.AddComponent<EmergencyCoordinator>();
-                _emergencies.Init(_emergency, session != null ? telemetry : null, _taskDefinition.PrivateSpace, ReleaseMicrophone);
+                _emergencies.Init(_emergency, session != null ? telemetry : null, PrivateSpace, ReleaseMicrophone);
             }
 
-            var hesitation = GetComponent<HesitationMonitor>();
-            if (hesitation != null)
-                gameObject.AddComponent<AacBoard>().Init(_machine, hesitation, telemetry, GetComponent<MascotStateManager>());
+            _hesitation = GetComponent<HesitationMonitor>();
+            if (_hesitation != null)
+            {
+                _aac = gameObject.AddComponent<AacBoard>();
+                _aac.Init(_machine, _hesitation, telemetry, GetComponent<MascotStateManager>());
+            }
+
+            if (_routine != null)
+            {
+                if (session == null) BeginRoutine(StudentProfile.Default, false);
+                else _auth.FetchProfile(session.StudentId, profile => BeginRoutine(profile, true));
+                return;
+            }
 
             if (session == null)
             {
@@ -79,6 +95,17 @@ namespace SmartLife.Core
                 return;
             }
             _auth.FetchRoutine(_taskDefinition.RouteId, routine => BeginTask(_taskDefinition.Arranged(routine), true));
+        }
+
+        // The profile applies once, at the start of the routine, never mid-session.
+        private void BeginRoutine(StudentProfile profile, bool signedIn)
+        {
+            if (_hesitation != null) _hesitation.SetHesitationSeconds(profile.HesitationSeconds);
+            if (_aac != null) _aac.SetOptions(profile.AacOptions);
+
+            TaskDefinition steps = _routine.Build(profile);
+            gameObject.AddComponent<StepSceneLoader>().Init(_machine, profile);
+            BeginTask(steps, signedIn);
         }
 
         private void BeginTask(TaskDefinition task, bool signedIn)

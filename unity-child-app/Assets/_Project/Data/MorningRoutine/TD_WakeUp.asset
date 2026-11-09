@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5caeaf7b12898784c911acf56639e8b0, type: 3}
+  m_Name: TD_WakeUp
+  m_EditorClassIdentifier: Assembly-CSharp::SmartLife.Core.TaskDefinition
+  routeId: rt_morning
+  kind: 0
+  steps:
+  - checkpointId: cp_wake_sit
+    markerId: MK_BED
+    prompt: Sit up in bed
+    cue: 0
+    demoClip: {fileID: 0}
+    holdSeconds: 5
+    sceneName: ADL_WakeSit
+  - checkpointId: cp_wake_stand
+    markerId: MK_BED
+    prompt: Stand up slowly
+    cue: 0
+    demoClip: {fileID: 0}
+    holdSeconds: 5
+    sceneName: ADL_WakeStand
+  privateSpace: 1

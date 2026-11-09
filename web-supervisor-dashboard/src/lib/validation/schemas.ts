@@ -68,6 +68,12 @@ export const routeCheckpointSchema = z.object({
   prompt: z.string().max(64).optional(),
   holdSeconds: z.number().min(0).optional(),
   aacBoardId: z.string().max(64).optional(),
+  taskId: z.string().max(64).optional(),
+});
+
+export const routeTaskSchema = z.object({
+  order: z.number().int().min(1),
+  label: z.string().min(1).max(64),
 });
 
 /** Stored shape of /routes/{routeId}. Publishing adds the stricter checks in routinePayloadSchema. */
@@ -76,6 +82,24 @@ export const routeSchema = z.object({
   kind: z.enum(['adl', 'nav']),
   version: z.number().int().min(0).default(0),
   checkpoints: z.record(z.string().max(64), routeCheckpointSchema),
+  tasks: z.record(z.string().max(64), routeTaskSchema).optional(),
+});
+
+export const HESITATION_MIN_S = 5;
+export const HESITATION_MAX_S = 120;
+
+/** Stored shape of /profiles/{studentId}. Missing fields fall back to the tablet defaults. */
+export const learnerProfileSchema = z.object({
+  routineId: z.string().min(1).max(64),
+  tasks: z.record(z.string().max(64), z.object({ order: z.number().int().min(1).max(50), enabled: z.boolean() })).default({}),
+  voicePrompts: z.boolean().default(true),
+  mascot: z.boolean().default(true),
+  hesitationSeconds: z.number().min(HESITATION_MIN_S).max(HESITATION_MAX_S).default(15),
+  aacOptions: z
+    .object({ too_loud: z.boolean(), need_help: z.literal(true), show_me: z.boolean(), break: z.boolean() })
+    .default({ too_loud: true, need_help: true, show_me: true, break: true }),
+  updatedAt: z.number().optional(),
+  updatedBy: z.string().optional(),
 });
 
 export const routinePayloadSchema = routeSchema.superRefine((route, ctx) => {

@@ -3,6 +3,7 @@ import './layout.css';
 
 const NAV = [
   { to: '/routines', label: 'Routine Builder' },
+  { to: '/profile', label: 'Learner Profile' },
   { to: '/telemetry', label: 'Live Telemetry' },
   { to: '/emergency', label: 'Emergency Intervention' },
 ];
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/telemetry" replace /> },
           { path: 'routines', lazy: () => import('./pages/RoutineBuilderPage') },
+          { path: 'profile', lazy: () => import('./pages/LearnerProfilePage') },
           { path: 'telemetry', lazy: () => import('./pages/LiveTelemetryPage') },
           { path: 'emergency', lazy: () => import('./pages/EmergencyInterventionPage') },
           { path: '*', element: <Navigate to="/telemetry" replace /> },

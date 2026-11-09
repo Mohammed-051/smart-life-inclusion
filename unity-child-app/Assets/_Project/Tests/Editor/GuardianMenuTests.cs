@@ -109,6 +109,7 @@ namespace SmartLife.Tests
             }
             public void SignOut() { }
             public void FetchRoutine(string routeId, Action<IReadOnlyList<RoutineEntry>> done) => done(null);
+            public void FetchProfile(string studentId, Action<StudentProfile> done) => done(StudentProfile.Default);
         }
 
         private GameObject _host;

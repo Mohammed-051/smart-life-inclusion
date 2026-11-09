@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,6 +39,7 @@ namespace SmartLife.UI
         private MascotStateManager _mascot;
         private Canvas _canvas;
         private bool _holdsPause;
+        private IReadOnlyCollection<string> _shown;
 
         public bool IsOpen => _canvas != null && _canvas.gameObject.activeSelf;
 
@@ -50,6 +52,19 @@ namespace SmartLife.UI
             _mascot = mascot;
             if (_monitor != null) _monitor.OnHesitation += Open;
             _machine.OnStateChanged += HandleStateChanged;
+        }
+
+        /// <summary>The learner's AAC options from their profile. Call before the board first opens.</summary>
+        public void SetOptions(IReadOnlyCollection<string> optionIds) => _shown = optionIds;
+
+        /// <summary>The options the board shows, in board order.</summary>
+        public static List<string> VisibleOptionIds(IReadOnlyCollection<string> shown)
+        {
+            var ids = new List<string>();
+            foreach (Option option in Options)
+                if (shown == null || shown.Contains(option.Id) || option.Id == StudentProfile.AlwaysOnAacOption)
+                    ids.Add(option.Id);
+            return ids;
         }
 
         /// <summary>Shows the board and freezes the clock. stepIndex is reserved for per-step boards.</summary>
@@ -83,8 +98,10 @@ namespace SmartLife.UI
             grid.childAlignment = TextAnchor.MiddleCenter;
             gridGo.GetComponent<LayoutElement>().minHeight = 2 * TileHeight + 24f;
 
+            List<string> visible = VisibleOptionIds(_shown);
             foreach (Option option in Options)
             {
+                if (!visible.Contains(option.Id)) continue;
                 Option captured = option;
                 Button button = UiKit.Button(grid.transform, option.Label, option.Color, () => Select(captured.Id), TileHeight);
                 button.GetComponentInChildren<TMP_Text>().fontSize = 44f;

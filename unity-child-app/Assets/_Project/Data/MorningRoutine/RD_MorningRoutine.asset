@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d80f324abeac4192b69a2a11c6c7b3a5, type: 3}
+  m_Name: RD_MorningRoutine
+  m_EditorClassIdentifier: Assembly-CSharp::SmartLife.Core.RoutineDefinition
+  routineId: rt_morning
+  tasks:
+  - taskId: task_wake
+    task: {fileID: 11400000, guid: 125ca038c142ec7db0a5c0f420112901, type: 2}
+  - taskId: task_go_bathroom
+    task: {fileID: 11400000, guid: 2284978c6518ca81e1e2ada9c0e32291, type: 2}
+  - taskId: task_toilet
+    task: {fileID: 11400000, guid: fa2667f98bb8024a3ce94e71c93c7d9e, type: 2}
+  - taskId: task_handwash
+    task: {fileID: 11400000, guid: 1aeb07cdd25f8e7ef7529c0c4e86b7a6, type: 2}
+  - taskId: task_teeth
+    task: {fileID: 11400000, guid: 7bbf0d4af0ac5840b5a5d38a3277fcfd, type: 2}
+  - taskId: task_go_bedroom
+    task: {fileID: 11400000, guid: ae3d860594a6dd48389ee84a1d59a05e, type: 2}
+  - taskId: task_dress
+    task: {fileID: 11400000, guid: f277964e3b148bb630f45967a4437602, type: 2}

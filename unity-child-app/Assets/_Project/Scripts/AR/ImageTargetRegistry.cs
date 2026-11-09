@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SmartLife.Core;
 using UnityEngine;
 using Vuforia;
@@ -11,6 +12,10 @@ namespace SmartLife.AR
     /// </summary>
     public class ImageTargetRegistry : MonoBehaviour
     {
+        /// <summary>The registry in the boot scene, for step scenes that anchor content to a marker.</summary>
+        public static ImageTargetRegistry Current { get; private set; }
+
+        private readonly Dictionary<string, ImageTargetBehaviour> _targets = new Dictionary<string, ImageTargetBehaviour>();
         private TaskStateMachine _machine;
         private bool _created;
         private bool _subscribed;
@@ -20,6 +25,7 @@ namespace SmartLife.AR
         public void Init(TaskStateMachine machine)
         {
             _machine = machine;
+            Current = this;
             if (!Application.isPlaying) return; // Vuforia only runs in Play mode and on device.
             if (VuforiaApplication.Instance.IsRunning) CreateTargets();
             else
@@ -32,7 +38,12 @@ namespace SmartLife.AR
         private void OnDestroy()
         {
             if (_subscribed) VuforiaApplication.Instance.OnVuforiaStarted -= CreateTargets;
+            if (Current == this) Current = null;
         }
+
+        /// <summary>The runtime Image Target for a marker, once Vuforia has created it.</summary>
+        public bool TryGetTarget(string markerId, out ImageTargetBehaviour target) =>
+            _targets.TryGetValue(markerId, out target);
 
         private void CreateTargets()
         {
@@ -65,6 +76,7 @@ namespace SmartLife.AR
                 }
 
                 target.gameObject.AddComponent<MarkerObserver>().Bind(_machine, markerId);
+                _targets[markerId] = target;
                 TargetCount++;
             }
 

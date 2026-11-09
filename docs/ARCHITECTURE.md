@@ -27,6 +27,15 @@ States: `Idle → AwaitingMarker(step i) → StepActive(i) → StepComplete(i) �
 - `Skip` → log `skipped`, `autonomous=false`, advance. `Reset` → i=0, log `reset`. `Pause/Resume` → toggle `Paused`, log override.
 Navigation routes reuse the same machine: each hallway marker is a step whose cue is an arrow.
 
+## Morning Routine engine (V1, one scene per step)
+- **Boot scene** `Scenes/MorningRoutine_Boot.unity` stays loaded for the whole routine: AR camera, `ImageTargetRegistry` (all marker targets), `TaskStateMachine`, telemetry, guardian menu, AAC board, emergency detection. Nothing here restarts between steps.
+- **Routine data:** `RoutineDefinition` `RD_MorningRoutine` lists tasks (Wake up, Go to bathroom, Toilet, Handwash, Brush teeth, Go to bedroom, Get dressed); each `TaskDefinition` step names its `sceneName`.
+- **Start:** `SceneBootstrapper` reads `/profiles/{studentId}` once (3 s timeout, else defaults), applies hesitation delay and AAC options, then `RoutineDefinition.Build(profile)` flattens the learner's tasks (order, skips) into one task for the state machine.
+- **Steps:** `StepSceneLoader` follows `OnStateChanged` and keeps exactly one step scene loaded additively (`Scenes/MorningRoutine/ADL_*.unity`). It never changes state. A pause keeps the scene.
+- **Step scene:** a `StepStage` moves its placeholder content (mascot, prop or arrow) onto the step's marker target and shows it only while tracked; the profile can hide the mascot.
+- **Markers:** consecutive steps may share a card (the sink) only if the earlier one ends on a hold timer; a step with no hold ends when the next card is scanned. Arrow cues complete on arrival. If a reorder leaves a no-hold step last, it gets a 10 s hold.
+- **Build:** `SMART-LIFE > Build Morning Routine Scenes` generates the boot scene (from `ADL_Handwashing`) and all step scenes, and writes Build Settings.
+
 ## Voice
 Android `SpeechRecognizer` via a small Java/Kotlin plugin (offline language pack preferred), wrapped by `IVoiceRecognizer` so it can be stubbed in Editor. Keyword match with synonyms; confidence threshold 0.6. Active only when guardian enables it.
 

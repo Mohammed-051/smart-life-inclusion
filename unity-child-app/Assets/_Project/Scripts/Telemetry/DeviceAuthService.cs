@@ -31,6 +31,9 @@ namespace SmartLife.Telemetry
         void SignOut();
         /// <summary>The published routine for this route, or null if it cannot be read in time.</summary>
         void FetchRoutine(string routeId, Action<IReadOnlyList<RoutineEntry>> done);
+
+        /// <summary>The learner's routine adjustments, or the default profile if they cannot be read in time.</summary>
+        void FetchProfile(string studentId, Action<StudentProfile> done);
     }
 
     /// <summary>Applies RTDB settings that must be set before the first database call.</summary>
@@ -161,6 +164,30 @@ namespace SmartLife.Telemetry
                     entries.Add(new RoutineEntry(checkpoint.Key, Convert.ToInt32(order), enabled));
                 }
                 done(entries);
+            });
+        }
+
+        public void FetchProfile(string studentId, Action<StudentProfile> done)
+        {
+            Task<DataSnapshot> read;
+            try
+            {
+                DatabaseSetup.Ensure();
+                read = FirebaseDatabase.DefaultInstance.RootReference.Child(DbPaths.Profile(studentId)).GetValueAsync();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DeviceAuth] Using the default profile. {e.GetType().Name}", this);
+                done(StudentProfile.Default);
+                return;
+            }
+
+            Task.WhenAny(read, Task.Delay(RoutineTimeoutMs)).ContinueWithOnMainThread(first =>
+            {
+                if (this == null) return;
+                bool ok = first.Result == read && !read.IsFaulted && !read.IsCanceled && read.Result.Exists;
+                if (!ok) Debug.LogWarning("[DeviceAuth] Using the default profile: the learner's profile could not be read.", this);
+                done(ok ? StudentProfile.FromDatabase(read.Result.Value) : StudentProfile.Default);
             });
         }
 

@@ -13,24 +13,28 @@ How to build the V1 Android APK and prove AR tracking works on the physical tabl
 
    Every Android build re-checks these and stops with a list if anything drifted.
 5. **Assets > External Dependency Manager > Android Resolver > Resolve**.
+6. **SMART-LIFE > Build Morning Routine Scenes**. Creates `MorningRoutine_Boot` and one scene per step (16) and writes Build Settings with the boot scene first. Run it again whenever a step is added or renamed, then commit the scenes.
 
 ## 2. Print the markers
-- Files: `docs/markers/MK_SINK.png`, `MK_SOAP.png`, `MK_RUB.png`, `MK_TOWEL.png`.
+- Morning Routine cards (7): `MK_BED`, `NAV_TO_BATH`, `MK_TOILET`, `MK_SINK`, `MK_TOOTHBRUSH`, `NAV_TO_BED`, `MK_WARDROBE` in `docs/markers/`.
+  Place: bed card by the bed, `NAV_TO_BATH` in the hallway facing the learner on the way to the bathroom, toilet card by the toilet, sink card above the sink, toothbrush card by the cup, `NAV_TO_BED` in the hallway on the way back, wardrobe card on the wardrobe.
+- The standalone handwashing scene also uses `MK_SOAP`, `MK_RUB` and `MK_TOWEL`.
 - Print each one **exactly 18 cm wide** (100% scale, no "fit to page"). The app is told the cards are 0.18 m wide; a different size makes tracking unstable.
 - Matte paper, no lamination glare. Mount them flat on stiff card.
 - The app builds its Image Targets from the same images at start (`ImageTargetRegistry`), so there is no Vuforia database to download.
 - To add or change markers: edit `MARKERS` in `tools/markers/generate_markers.py`, run `python -I tools/markers/generate_markers.py`, reprint, and commit every generated file.
 
 ## 3. Build and install
-1. **File > Build Profiles > Android**, switch platform. Scene list: `ADL_Handwashing`.
+1. **File > Build Profiles > Android**, switch platform. Scene list: `MorningRoutine_Boot` first, then the 16 `ADL_*` step scenes (step 1.6 sets this).
 2. Plug in the tablet with USB debugging on, then **Build And Run**. A debug build uses Unity's debug keystore. For the signed release, add your keystore in **Player > Publishing Settings** (keep it outside the repo).
 3. Grant the camera permission when the app asks.
 
 ## 4. Phase 1 gate (all must pass)
 | Check | How | Pass |
 |---|---|---|
-| Targets load | `adb logcat -s Unity` | `[ImageTargetRegistry] 4 of 4 marker targets ready.` |
-| Order works | Scan SINK, SOAP, RUB (wait 20 s), TOWEL (wait 5 s) | Each scan moves the card to the next prompt; a wrong card shows the hint and does not advance |
+| Targets load | `adb logcat -s Unity` | `[ImageTargetRegistry] 10 of 10 marker targets ready.` |
+| Routine runs | Walk the routine: bed, hallway, toilet, sink (5 steps on hold timers), toothbrush, hallway, wardrobe | Each card moves to the next step and its scene; no scene error in logcat; a wrong card shows the hint and does not advance |
+| Profile applies | In the dashboard Learner Profile, skip Toilet and turn the mascot off, then restart the app | Toilet is skipped and no mascot appears |
 | Distance | Hold each card at 30, 60 and 100 cm | Detected at all three |
 | Light | Classroom light, dim, window backlight | Detected in all three |
 | Frame rate | Profiler or `adb shell dumpsys gfxinfo`, 5-minute run | At least 30 FPS, p95 frame under 33 ms |
