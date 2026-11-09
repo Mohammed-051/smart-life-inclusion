@@ -1,0 +1,31 @@
+name: Dashboard
+
+on:
+  push:
+    branches: [main]
+    paths: ['web-supervisor-dashboard/**', 'firebase/**', '.github/workflows/dashboard.yml']
+  pull_request:
+    paths: ['web-supervisor-dashboard/**', 'firebase/**', '.github/workflows/dashboard.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-supervisor-dashboard
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-supervisor-dashboard/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

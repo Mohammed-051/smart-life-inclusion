@@ -62,3 +62,6 @@ unity-child-app/Assets/GeneratedLocalRepo/
 unity-child-app/Assets/GeneratedLocalRepo.meta
 unity-child-app/Assets/Plugins/Android/FirebaseApp.androidlib/
 unity-child-app/Assets/Plugins/Android/FirebaseApp.androidlib.meta
+
+# Local provisioning script with hard-coded credentials; never commit
+provision.js
