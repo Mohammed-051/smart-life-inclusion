@@ -31,6 +31,9 @@ namespace SmartLife.Core
         {
             _machine = GetComponent<TaskStateMachine>();
 
+            // Image Targets come from the shipped marker catalog, so tracking works without a Vuforia database.
+            gameObject.AddComponent<ImageTargetRegistry>().Init(_machine);
+
             // Begin() would make InstructionCard read a prompt from a missing task, so stop here instead.
             if (_taskDefinition == null)
             {

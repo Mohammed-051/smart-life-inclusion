@@ -339,6 +339,46 @@
    "observations": [
     "Scripts/Core/EmergencyStream.cs com.unity.webrtc call answering a supervisor offer"
    ]
+  },
+  {
+   "name": "MarkerCatalog",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/MarkerCatalog.cs",
+    "loads Resources/Markers catalog.json and card PNGs"
+   ]
+  },
+  {
+   "name": "ImageTargetRegistry",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/ImageTargetRegistry.cs",
+    "creates Vuforia Image Targets from catalog at start"
+   ]
+  },
+  {
+   "name": "MarkerCards",
+   "entityType": "asset",
+   "observations": [
+    "Resources/Markers/*.bytes + docs/markers/*.png",
+    "made by tools/markers/generate_markers.py; print 18 cm wide"
+   ]
+  },
+  {
+   "name": "V1AndroidBuildSettings",
+   "entityType": "unity_script",
+   "observations": [
+    "Assets/Editor/V1AndroidBuildSettings.cs",
+    "applies + checks tablet build settings and AA 0"
+   ]
+  },
+  {
+   "name": "DeviceBuildDoc",
+   "entityType": "doc",
+   "observations": [
+    "docs/DEVICE_BUILD.md",
+    "first APK and on-device marker checklist"
+   ]
   }
  ],
  "relations": [
@@ -661,6 +701,26 @@
    "from": "EmergencyCoordinator",
    "to": "EmergencyStream",
    "relationType": "runs"
+  },
+  {
+   "from": "ImageTargetRegistry",
+   "to": "MarkerCatalog",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "ImageTargetRegistry",
+   "to": "MarkerObserver",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "MarkerCatalog",
+   "to": "MarkerCards",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "ImageTargetRegistry",
+   "relationType": "depends_on"
   }
  ]
 }

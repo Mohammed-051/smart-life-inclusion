@@ -18,6 +18,13 @@ namespace SmartLife.AR
         [SerializeField] private string markerIdOverride;
 
         private float _lastFiredAt = -999f;
+
+        /// <summary>Wires an observer added at runtime. Call right after AddComponent, before its Start runs.</summary>
+        public void Bind(TaskStateMachine machine, string markerId)
+        {
+            stateMachine = machine;
+            markerIdOverride = markerId;
+        }
         private string MarkerId => string.IsNullOrEmpty(markerIdOverride) ? mObserverBehaviour.TargetName : markerIdOverride;
 
         // Deterministic: only full TRACKED pose triggers a transition, never EXTENDED_TRACKED.
