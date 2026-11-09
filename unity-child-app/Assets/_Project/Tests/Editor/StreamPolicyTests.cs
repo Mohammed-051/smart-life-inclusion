@@ -27,7 +27,7 @@ namespace SmartLife.Tests
         {
             Object.DestroyImmediate(_host);
             // OnDestroy does not run in edit mode, so remove the overlay's canvases here.
-            foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include))
                 Object.DestroyImmediate(canvas.gameObject);
         }
 
@@ -58,7 +58,7 @@ namespace SmartLife.Tests
             overlay.ShowIndicator(video);
 
             Assert.IsTrue(overlay.IsIndicatorShown);
-            Canvas[] canvases = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+            Canvas[] canvases = Object.FindObjectsByType<Canvas>();
             Canvas indicator = canvases.First(c => c.name == "StreamIndicatorCanvas");
             Assert.AreEqual(text, indicator.GetComponentInChildren<TMP_Text>().text);
             Assert.Greater(indicator.sortingOrder, 100, "It must sit above the guardian menu.");
