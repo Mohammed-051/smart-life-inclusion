@@ -60,3 +60,5 @@ google-services-desktop.json.meta
 # EDM4U regenerates this local Maven repo on every Android resolve (Firebase srcaar -> aar copies)
 unity-child-app/Assets/GeneratedLocalRepo/
 unity-child-app/Assets/GeneratedLocalRepo.meta
+unity-child-app/Assets/Plugins/Android/FirebaseApp.androidlib/
+unity-child-app/Assets/Plugins/Android/FirebaseApp.androidlib.meta
