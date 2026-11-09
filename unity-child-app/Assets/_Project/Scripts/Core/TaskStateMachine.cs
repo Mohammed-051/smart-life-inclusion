@@ -44,7 +44,8 @@ namespace SmartLife.Core
         /// <summary>Called by AR when a TRACKED image target is found.</summary>
         public void HandleMarker(string markerId)
         {
-            if (State == MachineState.Paused || State == MachineState.Complete || task == null) return;
+            // Idle: the guardian menu is still open, so a scan must not show a wrong-marker hint.
+            if (State is MachineState.Idle or MachineState.Paused or MachineState.Complete || task == null) return;
 
             // Time lock: a hold step only ends when its timer does, so no scan can skip it.
             // Guardian overrides go through Apply() and can still move on.
@@ -65,8 +66,8 @@ namespace SmartLife.Core
                 _holdTimer = expected.holdSeconds;
                 OnStepEvent?.Invoke(StepIndex, TaskStatus.Started, !_assistedThisStep);
                 SetState(MachineState.Active);
-                // Navigation checkpoints complete on arrival.
-                if (task.TaskKind == TaskDefinition.Kind.Nav) CompleteStep();
+                // Navigation checkpoints complete on arrival, including hallway arrows inside a routine.
+                if (task.TaskKind == TaskDefinition.Kind.Nav || TaskDefinition.IsArrival(expected.cue)) CompleteStep();
             }
         }
 

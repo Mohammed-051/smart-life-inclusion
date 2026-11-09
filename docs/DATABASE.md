@@ -6,7 +6,12 @@ All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`)
 /devices/{authUid}            { studentId, label }
 /supervisors/{authUid}        { role: "teacher"|"guardian"|"admin", students: {stu_x: true} }
 /routes/{routeId}             { name, kind: "nav"|"adl", version, checkpoints: {cpId: {order, markerId, label, cue,
-                                enabled?: bool (default true), prompt?, holdSeconds?, aacBoardId?}} }
+                                enabled?: bool (default true), prompt?, holdSeconds?, aacBoardId?, taskId?}},
+                                tasks?: {taskId: {order, label}} }   (tasks: multi-task routines such as rt_morning)
+/profiles/{studentId}         { routineId, tasks?: {taskId: {order (1-50), enabled}}, voicePrompts?, mascot?,
+                                hesitationSeconds? (5-120, default 15), aacOptions?: {too_loud, need_help (always true),
+                                show_me, break}, updatedAt, updatedBy }   (one learner's changes to the shared routine;
+                                the tablet applies them when the next routine starts; missing fields = defaults)
 /sessions/{studentId}/{sessionId}
                               { routeId, startedAt, completedAt?, status: "active"|"completed"|"aborted",
                                 checkpointsReached, autonomousCount, activeDurationMs?, hesitationTotalMs?, wrongScanCount? }
@@ -41,7 +46,7 @@ All timestamps are server ms epoch. Keys are opaque IDs (`stu_001`, `rt_hall_a`)
 | Writer | Paths |
 |---|---|
 | Tablet (device uid) | `checkpointLogs`, `nodeMetrics`, `liveStatus`, `sessions`, `overrides` (voice/menu), set `overrides/*/consumed`, create `emergencies`, set their `status`, write `interventions/*` `answer`, `status`, `endedAt`, tablet candidates |
-| Supervisor | `overrides` (dashboard source), `routes` (any supervisor publishes, admin deletes), `students` (admin), `emergencies/*` `status` and `acknowledgedBy`, create `interventions` for an open SOS with consent, then `status`, `endedAt`, supervisor candidates |
+| Supervisor | `overrides` (dashboard source), `routes` (any supervisor publishes, admin deletes), `profiles` (assigned learners; no app deletes), `students` (admin), `emergencies/*` `status` and `acknowledgedBy`, create `interventions` for an open SOS with consent, then `status`, `endedAt`, supervisor candidates |
 | Admin only | `devices`, `supervisors` |
 
 ## Metrics derivation

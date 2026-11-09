@@ -2,7 +2,7 @@
 
 AI-AR ecosystem for special education, vocational training and Assisted Daily Living (ADL).
 Locked stack (Phase-I Progress Report wins over Concept Note; **no WebAR**):
-- `unity-child-app/` — "Magic Lens" child app. Unity 6 (6000.6) with URP, Vuforia Engine (marker Image Targets), C#, Android 10+ tablets, >=30 FPS.
+- `unity-child-app/` — "Magic Lens" child app. Unity 6 (6000.6) with URP, Vuforia Engine (marker Image Targets), C#, Android 11+ tablets, >=30 FPS.
 - `firebase/` — Realtime Database rules + seed. Write latency budget <500 ms.
 - `web-supervisor-dashboard/` — React + Vite + TypeScript, Firebase JS SDK v10 (modular).
 - `blender-assets/` — avatars/props, exported FBX into Unity.
@@ -31,6 +31,7 @@ Touching the other owner's area: keep the diff small and note it in the PR.
 | Auth, rules, child data privacy | `docs/SECURITY.md` |
 | C# / TS conventions | `docs/CODE_STYLE.md` |
 | Test strategy, FPS/latency gates | `docs/TESTING.md` |
+| First APK, printing markers, on-device gate | `docs/DEVICE_BUILD.md` |
 | Entity graph, how to update it | `docs/GRAPH.md` + `.claude/memory/knowledge-graph.json` |
 
 ## Core features (MVP)

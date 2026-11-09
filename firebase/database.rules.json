@@ -43,9 +43,48 @@
             "prompt": { ".validate": "newData.isString() && newData.val().length <= 64" },
             "holdSeconds": { ".validate": "newData.isNumber() && newData.val() >= 0" },
             "aacBoardId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "taskId": { ".validate": "newData.isString() && newData.val().length <= 64" },
             "$other": { ".validate": false }
           }
         },
+        "tasks": {
+          "$taskId": {
+            ".validate": "newData.hasChildren(['order', 'label'])",
+            "order": { ".validate": "newData.isNumber() && newData.val() >= 1" },
+            "label": { ".validate": "newData.isString() && newData.val().length <= 64" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "profiles": {
+      "$studentId": {
+        ".read": "auth != null && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin' || root.child('devices/' + auth.uid + '/studentId').val() === $studentId)",
+        ".write": "auth != null && newData.exists() && (root.child('supervisors/' + auth.uid + '/students/' + $studentId).val() === true || root.child('supervisors/' + auth.uid + '/role').val() === 'admin')",
+        ".validate": "newData.hasChildren(['routineId', 'updatedAt', 'updatedBy'])",
+        "routineId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        "tasks": {
+          "$taskId": {
+            ".validate": "newData.hasChildren(['order', 'enabled'])",
+            "order": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 50" },
+            "enabled": { ".validate": "newData.isBoolean()" },
+            "$other": { ".validate": false }
+          }
+        },
+        "voicePrompts": { ".validate": "newData.isBoolean()" },
+        "mascot": { ".validate": "newData.isBoolean()" },
+        "hesitationSeconds": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 120" },
+        "aacOptions": {
+          "too_loud": { ".validate": "newData.isBoolean()" },
+          "need_help": { ".validate": "newData.isBoolean() && newData.val() === true" },
+          "show_me": { ".validate": "newData.isBoolean()" },
+          "break": { ".validate": "newData.isBoolean()" },
+          "$other": { ".validate": false }
+        },
+        "updatedAt": { ".validate": "newData.val() === now" },
+        "updatedBy": { ".validate": "newData.val() === auth.uid" },
         "$other": { ".validate": false }
       }
     },

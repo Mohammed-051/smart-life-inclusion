@@ -5,7 +5,8 @@
       "grade": "G3",
       "routeIds": {
         "rt_handwash": true,
-        "rt_hall_a": true
+        "rt_hall_a": true,
+        "rt_morning": true
       },
       "active": true,
       "streamingConsent": false
@@ -15,7 +16,8 @@
       "grade": "G4",
       "routeIds": {
         "rt_trash": true,
-        "rt_hall_a": true
+        "rt_hall_a": true,
+        "rt_morning": true
       },
       "active": true,
       "streamingConsent": false
@@ -145,6 +147,215 @@
         }
       },
       "version": 1
+    },
+    "rt_morning": {
+      "name": "Morning routine",
+      "kind": "adl",
+      "version": 1,
+      "tasks": {
+        "task_wake": {
+          "order": 1,
+          "label": "Wake up"
+        },
+        "task_go_bathroom": {
+          "order": 2,
+          "label": "Go to the bathroom"
+        },
+        "task_toilet": {
+          "order": 3,
+          "label": "Toilet"
+        },
+        "task_handwash": {
+          "order": 4,
+          "label": "Handwash"
+        },
+        "task_teeth": {
+          "order": 5,
+          "label": "Brush teeth"
+        },
+        "task_go_bedroom": {
+          "order": 6,
+          "label": "Go to the bedroom"
+        },
+        "task_dress": {
+          "order": 7,
+          "label": "Get dressed"
+        }
+      },
+      "checkpoints": {
+        "cp_wake_sit": {
+          "order": 1,
+          "markerId": "MK_BED",
+          "label": "Sit up in bed",
+          "cue": "avatar",
+          "taskId": "task_wake",
+          "holdSeconds": 5
+        },
+        "cp_wake_stand": {
+          "order": 2,
+          "markerId": "MK_BED",
+          "label": "Stand up slowly",
+          "cue": "avatar",
+          "taskId": "task_wake",
+          "holdSeconds": 5
+        },
+        "cp_go_bathroom": {
+          "order": 3,
+          "markerId": "NAV_TO_BATH",
+          "label": "Walk to the bathroom",
+          "cue": "arrow_straight",
+          "taskId": "task_go_bathroom",
+          "holdSeconds": 0
+        },
+        "cp_toilet": {
+          "order": 4,
+          "markerId": "MK_TOILET",
+          "label": "Use the toilet",
+          "cue": "avatar",
+          "taskId": "task_toilet",
+          "holdSeconds": 0
+        },
+        "cp_wash_wet": {
+          "order": 5,
+          "markerId": "MK_SINK",
+          "label": "Wet your hands",
+          "cue": "avatar",
+          "taskId": "task_handwash",
+          "holdSeconds": 5
+        },
+        "cp_wash_soap": {
+          "order": 6,
+          "markerId": "MK_SINK",
+          "label": "Take some soap",
+          "cue": "avatar",
+          "taskId": "task_handwash",
+          "holdSeconds": 5
+        },
+        "cp_wash_rub": {
+          "order": 7,
+          "markerId": "MK_SINK",
+          "label": "Rub for 20 seconds",
+          "cue": "avatar",
+          "taskId": "task_handwash",
+          "holdSeconds": 20
+        },
+        "cp_wash_rinse": {
+          "order": 8,
+          "markerId": "MK_SINK",
+          "label": "Rinse your hands",
+          "cue": "avatar",
+          "taskId": "task_handwash",
+          "holdSeconds": 5
+        },
+        "cp_dry_hands": {
+          "order": 9,
+          "markerId": "MK_SINK",
+          "label": "Dry your hands",
+          "cue": "avatar",
+          "taskId": "task_handwash",
+          "holdSeconds": 0
+        },
+        "cp_teeth_paste": {
+          "order": 10,
+          "markerId": "MK_TOOTHBRUSH",
+          "label": "Put paste on the brush",
+          "cue": "avatar",
+          "taskId": "task_teeth",
+          "holdSeconds": 10
+        },
+        "cp_teeth_brush": {
+          "order": 11,
+          "markerId": "MK_TOOTHBRUSH",
+          "label": "Brush your teeth",
+          "cue": "avatar",
+          "taskId": "task_teeth",
+          "holdSeconds": 120
+        },
+        "cp_teeth_rinse": {
+          "order": 12,
+          "markerId": "MK_TOOTHBRUSH",
+          "label": "Rinse your mouth",
+          "cue": "avatar",
+          "taskId": "task_teeth",
+          "holdSeconds": 0
+        },
+        "cp_go_bedroom": {
+          "order": 13,
+          "markerId": "NAV_TO_BED",
+          "label": "Walk to your bedroom",
+          "cue": "arrow_straight",
+          "taskId": "task_go_bedroom",
+          "holdSeconds": 0
+        },
+        "cp_dress_shirt": {
+          "order": 14,
+          "markerId": "MK_WARDROBE",
+          "label": "Put on your shirt",
+          "cue": "avatar",
+          "taskId": "task_dress",
+          "holdSeconds": 30
+        },
+        "cp_dress_pants": {
+          "order": 15,
+          "markerId": "MK_WARDROBE",
+          "label": "Put on your pants",
+          "cue": "avatar",
+          "taskId": "task_dress",
+          "holdSeconds": 30
+        },
+        "cp_dress_shoes": {
+          "order": 16,
+          "markerId": "MK_WARDROBE",
+          "label": "Put on your shoes",
+          "cue": "avatar",
+          "taskId": "task_dress",
+          "holdSeconds": 30
+        }
+      }
+    }
+  },
+  "profiles": {
+    "stu_001": {
+      "routineId": "rt_morning",
+      "voicePrompts": true,
+      "mascot": true,
+      "hesitationSeconds": 15,
+      "aacOptions": {
+        "too_loud": true,
+        "need_help": true,
+        "show_me": true,
+        "break": true
+      },
+      "updatedAt": 1762646400000,
+      "updatedBy": "sup_uid_teacher01"
+    },
+    "stu_002": {
+      "routineId": "rt_morning",
+      "tasks": {
+        "task_wake": {
+          "order": 1,
+          "enabled": true
+        },
+        "task_teeth": {
+          "order": 2,
+          "enabled": true
+        },
+        "task_toilet": {
+          "order": 3,
+          "enabled": false
+        }
+      },
+      "voicePrompts": true,
+      "mascot": false,
+      "hesitationSeconds": 25,
+      "aacOptions": {
+        "too_loud": false,
+        "need_help": true,
+        "show_me": true,
+        "break": true
+      },
+      "updatedAt": 1762646400000,
+      "updatedBy": "sup_uid_teacher01"
     }
   },
   "sessions": {

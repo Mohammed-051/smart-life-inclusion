@@ -77,6 +77,14 @@ export interface RouteCheckpoint {
   prompt?: string;
   holdSeconds?: number;
   aacBoardId?: string;
+  /** Set on routine checkpoints: the task this step belongs to. */
+  taskId?: string;
+}
+
+/** A task inside a multi-task routine such as rt_morning. */
+export interface RouteTask {
+  order: number;
+  label: string;
 }
 
 export interface Route {
@@ -84,6 +92,27 @@ export interface Route {
   kind: 'adl' | 'nav';
   version: number;
   checkpoints: Record<string, RouteCheckpoint>;
+  /** Present on routines (rt_morning). Their tasks are adjusted per learner in /profiles. */
+  tasks?: Record<string, RouteTask>;
+}
+
+export type AacOptionId = 'too_loud' | 'need_help' | 'show_me' | 'break';
+
+export interface TaskOverride {
+  order: number;
+  enabled: boolean;
+}
+
+/** /profiles/{studentId}: one learner's adjustments to the shared routine, applied at the next start. */
+export interface LearnerProfile {
+  routineId: string;
+  tasks: Record<string, TaskOverride>;
+  voicePrompts: boolean;
+  mascot: boolean;
+  hesitationSeconds: number;
+  aacOptions: Record<AacOptionId, boolean>;
+  updatedAt?: number;
+  updatedBy?: string;
 }
 
 /** A route checkpoint while it is being edited in the Routine Builder. */

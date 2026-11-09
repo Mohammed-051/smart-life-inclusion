@@ -23,6 +23,7 @@ namespace SmartLife.Core
             public Cue cue;
             [Tooltip("Avatar animation clip for this step (Avatar cue only)")] public AnimationClip demoClip;
             [Tooltip("Seconds before the step auto-completes; 0 = wait for next marker")] public float holdSeconds;
+            [Tooltip("Scene loaded additively while this step runs (one scene per step); empty = none")] public string sceneName;
         }
 
         [SerializeField] private string routeId = "rt_handwash";
@@ -65,6 +66,21 @@ namespace SmartLife.Core
             copy.steps = arranged.ToArray();
             return copy;
         }
+
+        /// <summary>A runtime task built from other tasks' steps, such as a whole morning routine.</summary>
+        public static TaskDefinition Compose(string name, string routeId, Kind kind, bool privateSpace, Step[] steps)
+        {
+            var composed = CreateInstance<TaskDefinition>();
+            composed.name = name;
+            composed.routeId = routeId;
+            composed.kind = kind;
+            composed.privateSpace = privateSpace;
+            composed.steps = steps;
+            return composed;
+        }
+
+        /// <summary>Arrow and Arrived steps are navigation checkpoints: reaching the marker completes them.</summary>
+        public static bool IsArrival(Cue cue) => cue != Cue.Avatar;
     }
 
     /// <summary>One checkpoint's place in a routine published to /routes.</summary>

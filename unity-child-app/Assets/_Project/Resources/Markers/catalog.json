@@ -1,0 +1,15 @@
+{
+  "printedWidthMeters": 0.18,
+  "markers": [
+    "MK_BED",
+    "NAV_TO_BATH",
+    "MK_TOILET",
+    "MK_SINK",
+    "MK_TOOTHBRUSH",
+    "NAV_TO_BED",
+    "MK_WARDROBE",
+    "MK_SOAP",
+    "MK_RUB",
+    "MK_TOWEL"
+  ]
+}

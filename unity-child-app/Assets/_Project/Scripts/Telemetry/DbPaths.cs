@@ -11,6 +11,7 @@ namespace SmartLife.Telemetry
         public static string RouteCheckpoints(string routeId) => $"routes/{routeId}/checkpoints";
         public static string Emergencies(string studentId) => $"emergencies/{studentId}";
         public static string Interventions(string studentId) => $"interventions/{studentId}";
+        public static string Profile(string studentId) => $"profiles/{studentId}";
         public static string StreamingConsent(string studentId) => $"students/{studentId}/streamingConsent";
         public const string ServerTimeOffset = ".info/serverTimeOffset";
         public static string Device(string uid) => $"devices/{uid}";

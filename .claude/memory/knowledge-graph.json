@@ -339,6 +339,110 @@
    "observations": [
     "Scripts/Core/EmergencyStream.cs com.unity.webrtc call answering a supervisor offer"
    ]
+  },
+  {
+   "name": "MarkerCatalog",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/MarkerCatalog.cs",
+    "loads Resources/Markers catalog.json and card PNGs"
+   ]
+  },
+  {
+   "name": "ImageTargetRegistry",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/ImageTargetRegistry.cs",
+    "creates Vuforia Image Targets from catalog at start"
+   ]
+  },
+  {
+   "name": "MarkerCards",
+   "entityType": "asset",
+   "observations": [
+    "Resources/Markers/*.bytes + docs/markers/*.png",
+    "made by tools/markers/generate_markers.py; print 18 cm wide"
+   ]
+  },
+  {
+   "name": "V1AndroidBuildSettings",
+   "entityType": "unity_script",
+   "observations": [
+    "Assets/Editor/V1AndroidBuildSettings.cs",
+    "applies + checks tablet build settings and AA 0"
+   ]
+  },
+  {
+   "name": "DeviceBuildDoc",
+   "entityType": "doc",
+   "observations": [
+    "docs/DEVICE_BUILD.md",
+    "first APK and on-device marker checklist"
+   ]
+  },
+  {
+   "name": "RoutineDefinition",
+   "entityType": "scriptable_object",
+   "observations": [
+    "Scripts/Core/RoutineDefinition.cs",
+    "ordered tasks; Build(profile) flattens to one task"
+   ]
+  },
+  {
+   "name": "RD_MorningRoutine",
+   "entityType": "asset",
+   "observations": [
+    "Data/MorningRoutine/RD_MorningRoutine.asset",
+    "V1 routine: 7 tasks, 16 steps, rt_morning"
+   ]
+  },
+  {
+   "name": "StudentProfile",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/StudentProfile.cs",
+    "parses /profiles: task order/skip, voice, mascot, delay, AAC"
+   ]
+  },
+  {
+   "name": "StepSceneLoader",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/Core/StepSceneLoader.cs",
+    "loads current step scene additively, one at a time"
+   ]
+  },
+  {
+   "name": "StepStage",
+   "entityType": "unity_script",
+   "observations": [
+    "Scripts/AR/StepStage.cs",
+    "step scene content anchored on its marker target"
+   ]
+  },
+  {
+   "name": "MorningRoutineScenes",
+   "entityType": "scene",
+   "observations": [
+    "Scenes/MorningRoutine_Boot.unity + Scenes/MorningRoutine/ADL_*",
+    "made by SMART-LIFE > Build Morning Routine Scenes"
+   ]
+  },
+  {
+   "name": "profiles",
+   "entityType": "rtdb_path",
+   "observations": [
+    "/profiles/{studentId}",
+    "learner overrides; assigned supervisor writes, tablet reads"
+   ]
+  },
+  {
+   "name": "LearnerProfilePage",
+   "entityType": "web_component",
+   "observations": [
+    "src/app/pages/LearnerProfilePage.tsx",
+    "edit task order/skip, voice, mascot, delay, AAC"
+   ]
   }
  ],
  "relations": [
@@ -661,6 +765,66 @@
    "from": "EmergencyCoordinator",
    "to": "EmergencyStream",
    "relationType": "runs"
+  },
+  {
+   "from": "ImageTargetRegistry",
+   "to": "MarkerCatalog",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "ImageTargetRegistry",
+   "to": "MarkerObserver",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "MarkerCatalog",
+   "to": "MarkerCards",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "ImageTargetRegistry",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "RoutineDefinition",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "SceneBootstrapper",
+   "to": "StepSceneLoader",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "RoutineDefinition",
+   "to": "StudentProfile",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "StepSceneLoader",
+   "to": "TaskStateMachine",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "StepStage",
+   "to": "ImageTargetRegistry",
+   "relationType": "depends_on"
+  },
+  {
+   "from": "StudentProfile",
+   "to": "profiles",
+   "relationType": "reads_from"
+  },
+  {
+   "from": "LearnerProfilePage",
+   "to": "profiles",
+   "relationType": "writes_to"
+  },
+  {
+   "from": "RD_MorningRoutine",
+   "to": "RoutineDefinition",
+   "relationType": "implements"
   }
  ]
 }

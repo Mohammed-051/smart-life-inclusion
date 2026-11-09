@@ -109,6 +109,7 @@ namespace SmartLife.Tests
             }
             public void SignOut() { }
             public void FetchRoutine(string routeId, Action<IReadOnlyList<RoutineEntry>> done) => done(null);
+            public void FetchProfile(string studentId, Action<StudentProfile> done) => done(StudentProfile.Default);
         }
 
         private GameObject _host;
@@ -131,14 +132,14 @@ namespace SmartLife.Tests
         public void TearDown()
         {
             Object.DestroyImmediate(_host);
-            foreach (var go in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)) Object.DestroyImmediate(go.gameObject);
+            foreach (var go in Object.FindObjectsByType<Canvas>()) Object.DestroyImmediate(go.gameObject);
             PauseLock.Clear();
         }
 
         private void Open() => _menu.Open(_auth, _pins, _results.Add);
 
         private static Button Find(string label) =>
-            Object.FindObjectsByType<Button>(FindObjectsSortMode.None).FirstOrDefault(b => b.GetComponentInChildren<TMP_Text>().text == label);
+            Object.FindObjectsByType<Button>().FirstOrDefault(b => b.GetComponentInChildren<TMP_Text>().text == label);
 
         private static void Press(string label)
         {
@@ -153,7 +154,7 @@ namespace SmartLife.Tests
         }
 
         private static bool ShowsText(string fragment) =>
-            Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None).Any(t => t.text.Contains(fragment));
+            Object.FindObjectsByType<TMP_Text>().Any(t => t.text.Contains(fragment));
 
         [Test]
         public void SavedSession_SkipsAllGuardianScreens()
@@ -180,7 +181,7 @@ namespace SmartLife.Tests
             Assert.AreEqual(PinResult.Ok, _pins.Verify("4827"));
             Assert.IsTrue(ShowsText("Sign in this tablet"));
 
-            var fields = Object.FindObjectsByType<TMP_InputField>(FindObjectsSortMode.None);
+            var fields = Object.FindObjectsByType<TMP_InputField>();
             fields.Single(f => f.contentType == TMP_InputField.ContentType.EmailAddress).text = " tablet@example.test ";
             fields.Single(f => f.contentType == TMP_InputField.ContentType.Password).text = "test-password";
             Press("Sign in");
@@ -219,7 +220,7 @@ namespace SmartLife.Tests
             Type("4827");
             Assert.IsNull(Find("Continue without saving progress"), "Offline should only appear after a failure.");
 
-            var fields = Object.FindObjectsByType<TMP_InputField>(FindObjectsSortMode.None);
+            var fields = Object.FindObjectsByType<TMP_InputField>();
             foreach (var f in fields) f.text = "x";
             Press("Sign in");
             Assert.IsTrue(ShowsText("nope"));

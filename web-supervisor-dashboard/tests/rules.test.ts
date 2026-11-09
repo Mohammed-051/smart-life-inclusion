@@ -194,3 +194,47 @@ describe('emergency streaming', () => {
     expect(canRead(null, '/emergencies/stu_001', data)).toBe(false);
   });
 });
+
+describe('morning routine and learner profiles', () => {
+  const profile = (over: object = {}) => ({
+    routineId: 'rt_morning',
+    tasks: { task_toilet: { order: 1, enabled: false } },
+    voicePrompts: true, mascot: false, hesitationSeconds: 20,
+    aacOptions: { too_loud: false, need_help: true, show_me: true, break: true },
+    updatedAt: NOW, updatedBy: TEACHER.uid, ...over,
+  });
+  const OTHER_TEACHER = { uid: 'sup_uid_teacher02' };
+  const withOtherTeacher = {
+    ...seed,
+    supervisors: { ...seed.supervisors, [OTHER_TEACHER.uid]: { role: 'teacher', students: { stu_002: true } } },
+  };
+
+  it('seeds a morning route that publishes with tasks and task ids', () => {
+    expect(canWrite(TEACHER, '/routes/rt_morning', seed.routes.rt_morning)).toBe(true);
+    expect(canWrite(TEACHER, '/routes/rt_morning/tasks/task_wake', { order: 1, label: 'Wake up', extra: 1 })).toBe(false);
+  });
+
+  it('is readable by the learner tablet and assigned supervisor only', () => {
+    expect(canRead(TABLET, '/profiles/stu_001')).toBe(true);
+    expect(canRead(TABLET, '/profiles/stu_002')).toBe(false);
+    expect(canRead(TEACHER, '/profiles/stu_002')).toBe(true);
+    expect(canRead(STRANGER, '/profiles/stu_001')).toBe(false);
+  });
+
+  it('is written by an assigned supervisor, not the tablet or another supervisor', () => {
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile())).toBe(true);
+    expect(canWrite(ADMIN, '/profiles/stu_001', profile({ updatedBy: ADMIN.uid }))).toBe(true);
+    expect(canWrite(TABLET, '/profiles/stu_001', profile({ updatedBy: TABLET.uid }))).toBe(false);
+    expect(canWrite(OTHER_TEACHER, '/profiles/stu_001', profile({ updatedBy: OTHER_TEACHER.uid }), withOtherTeacher)).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', null)).toBe(false);
+  });
+
+  it('keeps Need help on, the delay in range, and the stamp honest', () => {
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ aacOptions: { need_help: false } }))).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ hesitationSeconds: 2 }))).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ hesitationSeconds: 121 }))).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ updatedAt: NOW - 1 }))).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ updatedBy: ADMIN.uid }))).toBe(false);
+    expect(canWrite(TEACHER, '/profiles/stu_001', profile({ secret: 1 }))).toBe(false);
+  });
+});

@@ -25,6 +25,14 @@ namespace SmartLife.Core
         private void OnDisable() => stateMachine.OnStateChanged -= HandleStateChanged;
         private void Update() => Tick(Time.deltaTime);
 
+        public float HesitationSeconds => hesitationSeconds;
+
+        /// <summary>Per-learner delay from the profile, applied before the routine starts.</summary>
+        public void SetHesitationSeconds(float seconds)
+        {
+            if (seconds > 0f) hesitationSeconds = seconds;
+        }
+
         /// <summary>Call when the AAC board is dismissed to start a fresh wait.</summary>
         public void Rearm()
         {

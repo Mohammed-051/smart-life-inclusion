@@ -25,7 +25,7 @@
   </files>
   <settings>
     <setting name="androidAbis" value="arm64-v8a" />
-    <setting name="bundleId" value="com.DefaultCompany.unitychildapp" />
+    <setting name="bundleId" value="com.nocodenomads.smartlife" />
     <setting name="explodeAars" value="True" />
     <setting name="gradleBuildEnabled" value="True" />
     <setting name="gradlePropertiesTemplateEnabled" value="True" />

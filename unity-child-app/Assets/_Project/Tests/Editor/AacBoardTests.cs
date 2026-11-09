@@ -31,16 +31,16 @@ namespace SmartLife.Tests
         {
             Object.DestroyImmediate(_host);
             // OnDestroy does not run in edit mode, so remove the board's canvas here.
-            foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (Canvas canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include))
                 Object.DestroyImmediate(canvas.gameObject);
             PauseLock.Clear();
         }
 
         private static string[] ButtonLabels() =>
-            Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Select(b => b.GetComponentInChildren<TMP_Text>().text).ToArray();
+            Object.FindObjectsByType<Button>().Select(b => b.GetComponentInChildren<TMP_Text>().text).ToArray();
 
         private static void Press(string label) =>
-            Object.FindObjectsByType<Button>(FindObjectsSortMode.None).Single(b => b.GetComponentInChildren<TMP_Text>().text == label).onClick.Invoke();
+            Object.FindObjectsByType<Button>().Single(b => b.GetComponentInChildren<TMP_Text>().text == label).onClick.Invoke();
 
         [Test]
         public void Open_FreezesClock_AndShowsTheFourSymbols()

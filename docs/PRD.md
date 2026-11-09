@@ -33,7 +33,7 @@ Stack locked by Phase-I Progress Report: Unity 6 (`6000.6.8f1`, URP) + Vuforia E
 - Avg completion time = mean(`completedAt - startedAt`) over completed sessions per task.
 
 ## Non-functional
-- >=30 FPS on mid-range Android 10+ tablet (e.g. 4 GB RAM, Helio G-class / SD 6xx).
+- >=30 FPS on mid-range Android 11+ tablet (API 30+) (e.g. 4 GB RAM, Helio G-class / SD 6xx).
 - APK <150 MB. Permissions: CAMERA, INTERNET, RECORD_AUDIO only.
 - Minors' privacy: IDs only in telemetry; see SECURITY.md.
 

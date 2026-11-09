@@ -26,7 +26,8 @@ export function Component() {
 
   useEffect(() => watchRoutes(setRoutes, () => setLoadFailed(true)), []);
 
-  const ids = Object.keys(routes ?? {});
+  // Multi-task routines (rt_morning) are adjusted per learner on the Learner Profile page instead.
+  const ids = Object.keys(routes ?? {}).filter((id) => !routes?.[id]?.tasks);
   const activeId = routeId && ids.includes(routeId) ? routeId : ids[0] ?? null;
   const route = activeId && routes ? routes[activeId] : undefined;
   // Live updates refresh the list until a caregiver starts editing, so edits are never overwritten.
