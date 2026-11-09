@@ -56,3 +56,7 @@ database-debug.log
 *.tsbuildinfo
 google-services-desktop.json
 google-services-desktop.json.meta
+
+# EDM4U regenerates this local Maven repo on every Android resolve (Firebase srcaar -> aar copies)
+unity-child-app/Assets/GeneratedLocalRepo/
+unity-child-app/Assets/GeneratedLocalRepo.meta
