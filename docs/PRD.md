@@ -1,6 +1,6 @@
 # PRD — SMART-LIFE INCLUSION
 *An AI-AR Powered Ecosystem for Holistic Special Education, Vocational Training, and Assisted Daily Living (ADL).*
-Stack locked by Phase-I Progress Report: Unity 2022.3 LTS + Vuforia (Android tablet), Firebase RTDB, web supervisor dashboard. WebAR is out of scope.
+Stack locked by Phase-I Progress Report: Unity 6 (`6000.6.8f1`, URP) + Vuforia Engine 11.4.4 (Android tablet), Firebase RTDB, web supervisor dashboard. WebAR is out of scope.
 
 ## Users
 | Persona | Need |
