@@ -35,16 +35,17 @@ namespace SmartLife.EditorTools
                 return;
             }
 
+            // Copy steps first: OpenScene(Single) unloads unreferenced assets, so task refs read as null after it.
+            var steps = new List<TaskDefinition.Step>(AllSteps(routine));
             BuildBootScene(routine);
 
             var stepScenes = new List<string>();
-            var material = AssetDatabase.LoadAssetAtPath<Material>(MaterialPath);
             if (!AssetDatabase.IsValidFolder(StepSceneFolder))
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(StepSceneFolder).Replace('\\', '/'), Path.GetFileName(StepSceneFolder));
-            foreach (TaskDefinition.Step step in AllSteps(routine))
+            foreach (TaskDefinition.Step step in steps)
             {
                 string path = $"{StepSceneFolder}/{step.sceneName}.unity";
-                BuildStepScene(step, path, material);
+                BuildStepScene(step, path, AssetDatabase.LoadAssetAtPath<Material>(MaterialPath));
                 stepScenes.Add(path);
             }
 
@@ -73,6 +74,7 @@ namespace SmartLife.EditorTools
             }
 
             Scene boot = EditorSceneManager.OpenScene(BootScenePath, OpenSceneMode.Single);
+            routine = AssetDatabase.LoadAssetAtPath<RoutineDefinition>(RoutinePath); // OpenScene(Single) unloaded it.
             foreach (GameObject root in boot.GetRootGameObjects())
             {
                 // The template's hand-placed targets never see Vuforia; ImageTargetRegistry creates real ones.

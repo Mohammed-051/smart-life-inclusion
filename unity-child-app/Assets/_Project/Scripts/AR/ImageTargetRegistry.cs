@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SmartLife.Core;
 using UnityEngine;
@@ -21,6 +22,9 @@ namespace SmartLife.AR
         private bool _subscribed;
 
         public int TargetCount { get; private set; }
+
+        /// <summary>Raised once, after the targets exist. Late subscribers should check <see cref="TryGetTarget"/> first.</summary>
+        public event Action TargetsReady;
 
         public void Init(TaskStateMachine machine)
         {
@@ -81,6 +85,21 @@ namespace SmartLife.AR
             }
 
             Debug.Log($"[ImageTargetRegistry] {TargetCount} of {catalog.MarkerIds.Count} marker targets ready.", this);
+            TargetsReady?.Invoke();
         }
+    }
+
+    /// <summary>
+    /// Re-scan rule for steps that share a marker: once a marker has fired, it may not fire again
+    /// from the same still-visible detection. Tracking must be lost, then found, in between.
+    /// </summary>
+    public struct RescanGate
+    {
+        private bool _fired;
+
+        /// <summary>False while the marker that already fired has stayed in view.</summary>
+        public bool CanFire => !_fired;
+        public void MarkFired() => _fired = true;
+        public void MarkLost() => _fired = false;
     }
 }

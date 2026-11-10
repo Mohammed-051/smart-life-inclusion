@@ -6,6 +6,57 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine_Boot.unity
+    guid: 47d914843a2012d419f03ce50c3a91e3
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WakeSit.unity
+    guid: a97fd2f98ea51a3468c1a9c210a5c28d
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WakeStand.unity
+    guid: 4e6df078178e3764d85722caead3c3c6
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_GoBathroom.unity
+    guid: a4f7edf82d95b984690f7aa345aba912
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_Toilet.unity
+    guid: 3b9eaf20cf985e344bcf4b4c6e5f6448
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WashWet.unity
+    guid: 2006c0dc606a37c41b1f2eae74f167e7
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WashSoap.unity
+    guid: d40df76753f1db344b14bdbedc53cd35
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WashRub.unity
+    guid: 6acbb4f137ae20c4782d0daf0484f7a8
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_WashRinse.unity
+    guid: 9a56fce0f0504cc4db0338d26a139f77
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_DryHands.unity
+    guid: 71af2385119a60743a065fc528a370e6
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_TeethPaste.unity
+    guid: 5362038cabe14c641aa97d9841c5befa
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_TeethBrush.unity
+    guid: 2e597932de2e7664896c0be41c98b726
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_TeethRinse.unity
+    guid: 67ee5aa871f12f04983fee5213e93ee8
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_GoBedroom.unity
+    guid: 9d9dc40cc95b9d24a8f99a5d0d1017ca
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_DressShirt.unity
+    guid: feca858ca70db7b42aaa0b50d807f7c3
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_DressPants.unity
+    guid: e3b6845123f8bd34a9827922d5809632
+  - enabled: 1
+    path: Assets/_Project/Scenes/MorningRoutine/ADL_DressShoes.unity
+    guid: cae2a77fbe5f48b48abfcab6b46e6395
+  - enabled: 0
     path: Assets/_Project/Scenes/ADL_Handwashing.unity
     guid: 683a46f44d7ae3447837dffa0046b6b5
   m_configObjects:

@@ -18,7 +18,7 @@ namespace SmartLife.EditorTools
     {
         // docs/DESIGN_SYSTEM.md tokens: --ink and --surface.
         private static readonly Color Ink = new Color32(0x1F, 0x2A, 0x37, 0xFF);
-        private static readonly Color Surface = new Color(1f, 1f, 1f, 0.85f);
+        private static readonly Color Surface = Color.white; // Opaque: 3D content must never show through the instruction text.
         private const float PromptFontSize = 48f; // Within the 40-56 sp prompt range.
 
         // Must match the rt_handwash markers in firebase/seed.json and ADL_Handwashing.asset.
@@ -84,8 +84,8 @@ namespace SmartLife.EditorTools
 
             GameObject panel = GetOrCreateChild(canvasObject.transform, "CardPanel");
             RectTransform panelRect = panel.GetComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.1f, 0.05f);
-            panelRect.anchorMax = new Vector2(0.9f, 0.25f);
+            panelRect.anchorMin = new Vector2(0.15f, 0.05f);
+            panelRect.anchorMax = new Vector2(0.85f, 0.25f); // Clears the SOS button in the bottom-right corner.
             panelRect.offsetMin = panelRect.offsetMax = Vector2.zero;
             GetOrAdd<Image>(panel).color = Surface;
 

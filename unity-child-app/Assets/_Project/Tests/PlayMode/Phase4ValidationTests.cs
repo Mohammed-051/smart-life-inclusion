@@ -61,7 +61,7 @@ namespace SmartLife.Tests
         [UnityTest]
         public IEnumerator Hesitation_MkSinkStep_FiresAfter15SimulatedSeconds()
         {
-            Recorder fired = Listen(_hesitation, "OnHesitation");
+            Recorder fired = Listen(_hesitation, "OnStall");
 
             Call(_machine, "HandleMarker", "MK_SINK");
             Assert.AreEqual("Active", State(), "MK_SINK should start the first step.");
@@ -74,7 +74,7 @@ namespace SmartLife.Tests
             while (fired.Calls.Count == 0 && Time.realtimeSinceStartup < deadline) yield return null;
             float simulated = Time.time - start;
 
-            Assert.AreEqual(1, fired.Calls.Count, "OnHesitation should fire once.");
+            Assert.AreEqual(1, fired.Calls.Count, "OnStall should fire once.");
             Assert.AreEqual(0, fired.Calls[0], "It should report the MK_SINK step.");
             Assert.GreaterOrEqual((float)Get(_hesitation, "ElapsedSeconds"), 15f);
             Assert.That(simulated, Is.InRange(14.5f, 18f), "It should fire at about 15 simulated seconds.");
@@ -82,7 +82,7 @@ namespace SmartLife.Tests
             // Stays quiet until the board is dismissed.
             float keepRunning = Time.realtimeSinceStartup + 1f;
             while (Time.realtimeSinceStartup < keepRunning) yield return null;
-            Assert.AreEqual(1, fired.Calls.Count, "OnHesitation should not repeat on its own.");
+            Assert.AreEqual(1, fired.Calls.Count, "OnStall should not repeat on its own.");
         }
 
         [UnityTest]
@@ -91,11 +91,13 @@ namespace SmartLife.Tests
             Component board = Add("SmartLife.UI.AacBoard");
             Call(board, "Init", _machine, _hesitation, null, null);
 
+            Call(_machine, "HandleMarker", "MK_SINK");
             Time.timeScale = 15f; // 15 simulated seconds in about 1 real second.
-            float deadline = Time.realtimeSinceStartup + 10f;
-            while (!(bool)Get(board, "IsOpen") && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return new WaitForSecondsRealtime(1.5f);
+            Assert.IsFalse((bool)Get(board, "IsOpen"), "The timer must never open the board.");
 
-            Assert.IsTrue((bool)Get(board, "IsOpen"), "The board should open when the 15 s timer expires.");
+            Call(board, "Open", 0); // the child's Help press
+            Assert.IsTrue((bool)Get(board, "IsOpen"), "The board should open on Help.");
             Assert.AreEqual(0f, Time.timeScale, "Opening the board should freeze the clock.");
             foreach (string label in new[] { "Too loud", "Need help", "Show me" })
                 Assert.IsNotNull(GameObject.Find(label), $"The board should show {label}.");

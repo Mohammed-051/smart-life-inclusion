@@ -10,8 +10,8 @@ using SmartLife.Telemetry;
 namespace SmartLife.UI
 {
     /// <summary>
-    /// AAC picture board, opened by HesitationMonitor after 15 s without action. It freezes the task
-    /// clock and fills the screen, so it stays the only cue. See docs/clinical_architecture.md 3.2.
+    /// AAC picture board, opened only when the child presses Help, never by a timer. It freezes the
+    /// task clock and fills the screen, so it stays the only cue. See docs/clinical_architecture.md 3.2.
     /// </summary>
     public class AacBoard : MonoBehaviour
     {
@@ -51,7 +51,6 @@ namespace SmartLife.UI
             _monitor = monitor;
             _telemetry = telemetry;
             _mascot = mascot;
-            if (_monitor != null) _monitor.OnHesitation += Open;
             _machine.OnStateChanged += HandleStateChanged;
         }
 
@@ -107,6 +106,8 @@ namespace SmartLife.UI
                 Button button = UiKit.Button(grid.transform, option.Label, option.Color, () => Select(captured.Id), TileHeight);
                 button.GetComponentInChildren<TMP_Text>().fontSize = 44f;
             }
+            // Back only closes: no telemetry, no state change. The board must never trap the child.
+            UiKit.Button(column, "Back", UiKit.Turn, Close);
         }
 
         private void Select(string id)
@@ -147,7 +148,6 @@ namespace SmartLife.UI
 
         private void OnDestroy()
         {
-            if (_monitor != null) _monitor.OnHesitation -= Open;
             if (_machine != null) _machine.OnStateChanged -= HandleStateChanged;
             if (_holdsPause) PauseLock.Release();
             if (_canvas == null) return;

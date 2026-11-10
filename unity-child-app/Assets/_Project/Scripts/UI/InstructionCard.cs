@@ -20,16 +20,28 @@ namespace SmartLife.UI
         private CanvasGroup _group;
         private Coroutine _fade;
 
+        /// <summary>The cue the card shows (or is fading to). Always the step instruction, never a hint.</summary>
+        public string Cue { get; private set; }
+        /// <summary>How many fades have started. One per content change.</summary>
+        public int FadesStarted { get; private set; }
+
         private void Awake() => _group = GetComponent<CanvasGroup>();
-        private void OnEnable()
+        private void OnEnable() => Bind();
+        private void OnDisable() => stateMachine.OnStateChanged -= Show;
+
+        /// <summary>Wires the card without the scene. Edit mode does not run OnEnable.</summary>
+        public void Init(TaskStateMachine machine, TMP_Text text)
         {
-            stateMachine.OnStateChanged += Show;
-            stateMachine.OnUnexpectedMarker += Hint;
+            stateMachine = machine;
+            label = text;
+            if (_group == null) _group = GetComponent<CanvasGroup>();
+            Bind();
         }
-        private void OnDisable()
+
+        private void Bind()
         {
             stateMachine.OnStateChanged -= Show;
-            stateMachine.OnUnexpectedMarker -= Hint;
+            stateMachine.OnStateChanged += Show;
         }
 
         private void Show(MachineState state, int step)
@@ -43,19 +55,22 @@ namespace SmartLife.UI
             SetText(text);
         }
 
-        private void Hint(int expectedStep) => SetText("Find the next sign");
-
+        // Wrong-marker hint dropped: one cue at a time, and the instruction must never be erased.
         private void SetText(string text)
         {
+            if (text == Cue) return; // a repeat notification for the same content must not fade again
+            Cue = text;
+            FadesStarted++;
             if (_fade != null) StopCoroutine(_fade);
             _fade = StartCoroutine(FadeTo(text));
         }
 
+        // One fade = out then in. Starts from the current alpha, so a cancelled fade does not jump.
         private IEnumerator FadeTo(string text)
         {
-            for (float t = 0; t < FadeSeconds; t += Time.unscaledDeltaTime) { _group.alpha = 1f - t / FadeSeconds; yield return null; }
+            for (float a = _group.alpha; a > 0f; a -= Time.unscaledDeltaTime / FadeSeconds) { _group.alpha = a; yield return null; }
             label.text = text;
-            for (float t = 0; t < FadeSeconds; t += Time.unscaledDeltaTime) { _group.alpha = t / FadeSeconds; yield return null; }
+            for (float a = 0f; a < 1f; a += Time.unscaledDeltaTime / FadeSeconds) { _group.alpha = a; yield return null; }
             _group.alpha = 1f;
         }
     }

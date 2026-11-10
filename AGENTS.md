@@ -29,6 +29,8 @@ Touching the other owner's area: keep the diff small and note it in the PR.
 | Modules, data flow, state machine | `docs/ARCHITECTURE.md` |
 | RTDB schema, paths, indexes | `docs/DATABASE.md` |
 | Auth, rules, child data privacy | `docs/SECURITY.md` |
+| Mascot, AAC board, hesitation/emergency flow, streaming | `docs/clinical_architecture.md` |
+| Guardian consent (audio monitoring, emergency streaming) | `docs/GUARDIAN_CONSENT.md` |
 | C# / TS conventions | `docs/CODE_STYLE.md` |
 | Test strategy, FPS/latency gates | `docs/TESTING.md` |
 | First APK, printing markers, on-device gate | `docs/DEVICE_BUILD.md` |
