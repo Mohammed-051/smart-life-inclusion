@@ -19,6 +19,7 @@ namespace SmartLife.AR
         [SerializeField] private GameObject mascot;
 
         private ObserverBehaviour _target;
+        private ImageTargetRegistry _registry;
 
         public string MarkerId => markerId;
 
@@ -31,8 +32,29 @@ namespace SmartLife.AR
 
             // Without a running Vuforia (Editor preview) the content stays where the scene put it.
             ImageTargetRegistry registry = ImageTargetRegistry.Current;
-            if (registry == null || !registry.TryGetTarget(markerId, out ImageTargetBehaviour target)) return;
+            if (registry == null) return;
 
+            if (registry.TryGetTarget(markerId, out ImageTargetBehaviour target)) Anchor(target);
+            else
+            {
+                // Targets are created asynchronously after Vuforia starts; stay hidden until they exist.
+                content.gameObject.SetActive(false);
+                _registry = registry;
+                registry.TargetsReady += OnTargetsReady;
+            }
+        }
+
+        private void OnTargetsReady()
+        {
+            _registry.TargetsReady -= OnTargetsReady;
+            _registry = null;
+            if (ImageTargetRegistry.Current != null && ImageTargetRegistry.Current.TryGetTarget(markerId, out ImageTargetBehaviour target))
+                Anchor(target);
+            else Debug.LogError($"[StepStage] No target for marker '{markerId}'; the step has no AR content.", this);
+        }
+
+        private void Anchor(ImageTargetBehaviour target)
+        {
             _target = target;
             content.SetParent(target.transform, false);
             target.OnTargetStatusChanged += HandleStatus;
@@ -49,6 +71,7 @@ namespace SmartLife.AR
         // The content now lives under a target in the boot scene, so unloading this scene would leave it behind.
         private void OnDestroy()
         {
+            if (_registry != null) _registry.TargetsReady -= OnTargetsReady;
             if (_target != null) _target.OnTargetStatusChanged -= HandleStatus;
             if (content != null && _target != null) Destroy(content.gameObject);
         }

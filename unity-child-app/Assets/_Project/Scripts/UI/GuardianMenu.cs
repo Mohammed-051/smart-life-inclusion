@@ -19,6 +19,7 @@ namespace SmartLife.UI
     {
         private const int CanvasOrder = 100;
         private const float HotspotSize = 140f;
+        private const float IdleRelockSeconds = 60f;
 
         /// <summary>One row in the in-task menu. Label returns the current text, so toggles can read on or off.</summary>
         public sealed class MenuAction
@@ -45,6 +46,14 @@ namespace SmartLife.UI
         private Action _afterPin;
         private bool _holdsPause;
         private bool _busy;
+
+        private float _lastInputAt;
+
+        /// <summary>True from a correct PIN at the in-task menu until relock. The voice gate follows this.</summary>
+        public bool Unlocked { get; private set; }
+        public event Action<bool> UnlockChanged;
+        /// <summary>Injectable so EditMode tests can move time. Unscaled: the task clock is frozen while the menu is open.</summary>
+        public Func<float> Clock = () => Time.unscaledTime;
 
         public bool IsOpen => _screen != null && _screen.gameObject.activeSelf;
 
@@ -89,7 +98,37 @@ namespace SmartLife.UI
                 PauseLock.Acquire();
                 _holdsPause = true;
             }
-            ShowPinThen(ShowActions);
+            ShowPinThen(() =>
+            {
+                SetUnlocked(true);
+                ShowActions();
+            });
+        }
+
+        private void SetUnlocked(bool on)
+        {
+            _lastInputAt = Clock();
+            if (Unlocked == on) return;
+            Unlocked = on;
+            UnlockChanged?.Invoke(on);
+        }
+
+        /// <summary>Relocks after 60 s with no guardian input. Called from Update, or directly in tests.</summary>
+        public void Tick()
+        {
+            if (Unlocked && Clock() - _lastInputAt >= IdleRelockSeconds) Relock();
+        }
+
+        private void Update() => Tick();
+        private void OnApplicationPause(bool paused) { if (paused) Relock(); }
+        private void OnApplicationFocus(bool focus) { if (!focus) Relock(); }
+
+        /// <summary>Closes the menu and tells listeners (the voice gate) to shut.</summary>
+        public void Relock()
+        {
+            if (!Unlocked) return;
+            CloseMenu();
+            SetUnlocked(false);
         }
 
         private void OnDestroy()
@@ -173,6 +212,7 @@ namespace SmartLife.UI
         private void PressDigit(string digit)
         {
             if (_entry.Length >= GuardianPinStore.PinLength) return;
+            _lastInputAt = Clock();
             _entry += digit;
             _dots.text = RenderDots();
             if (_entry.Length == GuardianPinStore.PinLength) SubmitPin();
@@ -280,6 +320,7 @@ namespace SmartLife.UI
                     MenuAction captured = action;
                     UiKit.Button(column, captured.Label(), UiKit.Surface, () =>
                     {
+                        _lastInputAt = Clock();
                         if (captured.KeepOpen)
                         {
                             captured.Run();

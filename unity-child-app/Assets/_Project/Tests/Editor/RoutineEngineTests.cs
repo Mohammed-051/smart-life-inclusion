@@ -179,6 +179,16 @@ namespace SmartLife.Tests
         }
 
         [Test]
+        public void MorningRoutine_BootSceneRunsTheRoutine()
+        {
+            // An empty _routine makes the boot scene silently fall back to the single handwash task.
+            string guid = AssetDatabase.AssetPathToGUID(MorningRoutinePath);
+            string boot = File.ReadAllText(SmartLife.EditorTools.MorningRoutineSceneBuilder.BootScenePath);
+            StringAssert.Contains($"_routine: {{fileID: 11400000, guid: {guid}", boot,
+                "Boot scene has no routine. Run SMART-LIFE > Build Morning Routine Scenes.");
+        }
+
+        [Test]
         public void MorningRoutine_MatchesTheSeededRoute()
         {
             string seed = File.ReadAllText(Path.Combine(Application.dataPath, "../../firebase/seed.json"));

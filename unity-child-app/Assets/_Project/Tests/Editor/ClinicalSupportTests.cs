@@ -70,7 +70,7 @@ namespace SmartLife.Tests
             Call(monitor, "OnEnable");
             _machine.Begin(_task);
             var count = new int[1];
-            monitor.OnHesitation += _ => count[0]++;
+            monitor.OnStall += _ => count[0]++;
             fired = count;
             return monitor;
         }
@@ -99,14 +99,15 @@ namespace SmartLife.Tests
         }
 
         [Test]
-        public void Hesitation_PauseFreezesAndResumeKeepsClock()
+        public void Hesitation_PauseFreezesAndResumeStartsFreshWait()
         {
             var monitor = StartHesitation(out _);
             Call(monitor, "Tick", 10f);
             _machine.Apply(OverrideCommand.Pause);
             Call(monitor, "Tick", 100f);
-            _machine.Apply(OverrideCommand.Resume);
             Assert.AreEqual(10f, monitor.ElapsedSeconds, 0.001f);
+            _machine.Apply(OverrideCommand.Resume);
+            Assert.AreEqual(0f, monitor.ElapsedSeconds, 0.001f);
         }
 
         [Test]

@@ -47,7 +47,7 @@ namespace SmartLife.Tests
         {
             _board.Open(0);
             Assert.AreEqual(0f, Time.timeScale);
-            CollectionAssert.AreEquivalent(new[] { "Too loud", "Need help", "Show me", "Break" }, ButtonLabels());
+            CollectionAssert.AreEquivalent(new[] { "Too loud", "Need help", "Show me", "Break", "Back" }, ButtonLabels());
         }
 
         [Test]

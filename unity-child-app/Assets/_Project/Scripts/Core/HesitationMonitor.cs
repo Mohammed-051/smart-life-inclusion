@@ -4,22 +4,21 @@ using UnityEngine;
 namespace SmartLife.Core
 {
     /// <summary>
-    /// Raises OnHesitation when the child has not acted for 15 s, so the UI can open the
-    /// step's AAC board. Only reads task state. See docs/clinical_architecture.md section 3.2.
+    /// Raises OnStall when the child has not acted for the threshold (prompt ladder, guardian
+    /// alert). It never opens the help board: the child opens help only by pressing Help.
+    /// Only reads task state. See docs/clinical_architecture.md section 3.2.
     /// </summary>
     public class HesitationMonitor : MonoBehaviour
     {
         [SerializeField] private TaskStateMachine stateMachine;
         [SerializeField] private float hesitationSeconds = 15f;
 
-        /// <summary>(stepIndex) — the AAC board opens for this step.</summary>
-        public event Action<int> OnHesitation;
+        /// <summary>(stepIndex) — the child has stalled on this step. Informational only.</summary>
+        public event Action<int> OnStall;
 
         public float ElapsedSeconds { get; private set; }
 
         private bool _fired;
-        private bool _wasPaused;
-        private int _lastStep;
 
         private void OnEnable() => stateMachine.OnStateChanged += HandleStateChanged;
         private void OnDisable() => stateMachine.OnStateChanged -= HandleStateChanged;
@@ -46,7 +45,7 @@ namespace SmartLife.Core
             ElapsedSeconds += deltaTime;
             if (ElapsedSeconds < hesitationSeconds) return;
             _fired = true;
-            OnHesitation?.Invoke(stateMachine.StepIndex);
+            OnStall?.Invoke(stateMachine.StepIndex);
         }
 
         // A running hold means the child is doing the step, which is not hesitation.
@@ -54,13 +53,11 @@ namespace SmartLife.Core
             stateMachine.State == MachineState.Awaiting
             || (stateMachine.State == MachineState.Active && !stateMachine.IsHolding);
 
+        // Tick is frozen while Paused (IsWaitingOnChild is false). Leaving Paused starts a fresh wait,
+        // so resuming never fires a stall at once.
         private void HandleStateChanged(MachineState state, int stepIndex)
         {
-            // Pause and resume keep the clock, so a pause never hands the child a new 15 s.
-            bool resuming = _wasPaused && stepIndex == _lastStep;
-            _wasPaused = state == MachineState.Paused;
-            _lastStep = stepIndex;
-            if (!_wasPaused && !resuming) Rearm();
+            if (state != MachineState.Paused) Rearm();
         }
     }
 }

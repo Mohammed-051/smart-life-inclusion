@@ -18,6 +18,7 @@ namespace SmartLife.AR
         [SerializeField] private string markerIdOverride;
 
         private float _lastFiredAt = -999f;
+        private RescanGate _rescan;
 
         /// <summary>Wires an observer added at runtime. Call right after AddComponent, before its Start runs.</summary>
         public void Bind(TaskStateMachine machine, string markerId)
@@ -35,7 +36,13 @@ namespace SmartLife.AR
             base.OnTrackingFound(); // enables child renderers (avatar/arrow anchor)
             // A scan during a hold is ignored, so it must not start the debounce and delay the
             // pickup in Update when the hold ends.
-            if (IsTracked && !stateMachine.IsHolding) Register();
+            if (IsTracked && !stateMachine.IsHolding && _rescan.CanFire) Register();
+        }
+
+        protected override void OnTrackingLost()
+        {
+            base.OnTrackingLost();
+            _rescan.MarkLost(); // a marker shared by two steps fires again only after it left the view
         }
 
         /// <summary>
@@ -45,7 +52,7 @@ namespace SmartLife.AR
         /// </summary>
         private void Update()
         {
-            if (IsTracked && IsExpectedNext()) Register();
+            if (IsTracked && _rescan.CanFire && IsExpectedNext()) Register();
         }
 
         private bool IsExpectedNext()
@@ -60,6 +67,7 @@ namespace SmartLife.AR
             if (Time.unscaledTime - _lastFiredAt < DebounceSeconds) return;
 
             _lastFiredAt = Time.unscaledTime;
+            _rescan.MarkFired();
             stateMachine.HandleMarker(MarkerId);
         }
     }

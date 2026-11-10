@@ -56,6 +56,7 @@ namespace SmartLife.Core
 
             _auth = gameObject.AddComponent<DeviceAuthService>();
             _menu = gameObject.AddComponent<GuardianMenu>();
+            _menu.UnlockChanged += on => { if (voiceRouter != null) voiceRouter.SetGuardianUnlocked(on); };
             _menu.Open(_auth, new GuardianPinStore(new PlayerPrefsStore()), StartTask);
         }
 
@@ -80,6 +81,7 @@ namespace SmartLife.Core
             {
                 _aac = gameObject.AddComponent<AacBoard>();
                 _aac.Init(_machine, _hesitation, telemetry, GetComponent<MascotStateManager>());
+                AddHelpButton();
             }
 
             if (_routine != null)
@@ -95,6 +97,17 @@ namespace SmartLife.Core
                 return;
             }
             _auth.FetchRoutine(_taskDefinition.RouteId, routine => BeginTask(_taskDefinition.Arranged(routine), true));
+        }
+
+        // The only way into the AAC board. Sits under the board's canvas, so it is covered while the board is open.
+        private void AddHelpButton()
+        {
+            Canvas canvas = UiKit.CreateCanvas("HelpButtonCanvas", 10);
+            // Calm blue, left edge, mid height: far from SOS (pink, bottom-right) and above/beside the bottom instruction card.
+            var rect = (RectTransform)UiKit.Button(canvas.transform, "Help", UiKit.Turn, () => _aac.Open(_machine.StepIndex)).transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 0.5f);
+            rect.anchoredPosition = new Vector2(32f, 0f);
+            rect.sizeDelta = new Vector2(220f, 120f);
         }
 
         // The profile applies once, at the start of the routine, never mid-session.

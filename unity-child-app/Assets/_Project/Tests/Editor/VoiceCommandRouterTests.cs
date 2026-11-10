@@ -10,7 +10,7 @@ namespace SmartLife.Tests
         [TestCase("Reset task", OverrideCommand.Reset)]
         [TestCase("emergency pause", OverrideCommand.Pause)]
         [TestCase("please resume", OverrideCommand.Resume)]
-        [TestCase("stop and skip", OverrideCommand.Pause)] // safety wins
+        [TestCase("pause and skip", OverrideCommand.Pause)] // safety wins
         public void Maps_phrases(string phrase, OverrideCommand expected)
         {
             Assert.IsTrue(VoiceCommandRouter.TryParse(phrase, out var cmd));
