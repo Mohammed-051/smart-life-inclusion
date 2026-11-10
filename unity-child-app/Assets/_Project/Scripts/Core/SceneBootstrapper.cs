@@ -57,6 +57,7 @@ namespace SmartLife.Core
             _auth = gameObject.AddComponent<DeviceAuthService>();
             _menu = gameObject.AddComponent<GuardianMenu>();
             _menu.UnlockChanged += on => { if (voiceRouter != null) voiceRouter.SetGuardianUnlocked(on); };
+            if (voiceRouter != null) voiceRouter.CommandAccepted += _ => _menu.NoteGuardianActivity();
             _menu.Open(_auth, new GuardianPinStore(new PlayerPrefsStore()), StartTask);
         }
 

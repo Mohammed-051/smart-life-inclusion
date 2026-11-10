@@ -119,6 +119,9 @@ namespace SmartLife.UI
             if (Unlocked && Clock() - _lastInputAt >= IdleRelockSeconds) Relock();
         }
 
+        /// <summary>Accepted voice commands count as guardian activity so they hold off the idle relock.</summary>
+        public void NoteGuardianActivity() { if (Unlocked) _lastInputAt = Clock(); }
+
         private void Update() => Tick();
         private void OnApplicationPause(bool paused) { if (paused) Relock(); }
         private void OnApplicationFocus(bool focus) { if (!focus) Relock(); }

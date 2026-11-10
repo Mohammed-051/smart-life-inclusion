@@ -66,9 +66,15 @@ namespace SmartLife.AR
         {
             if (Time.unscaledTime - _lastFiredAt < DebounceSeconds) return;
 
+            // Consume the debounce and the rescan gate only if the machine acted on the scan. An ignored
+            // scan (Idle, Paused, holding, wrong marker) must leave Update's pickup free to fire later.
+            var stateBefore = stateMachine.State;
+            int stepBefore = stateMachine.StepIndex;
+            stateMachine.HandleMarker(MarkerId);
+            if (stateMachine.State == stateBefore && stateMachine.StepIndex == stepBefore) return;
+
             _lastFiredAt = Time.unscaledTime;
             _rescan.MarkFired();
-            stateMachine.HandleMarker(MarkerId);
         }
     }
 }

@@ -191,6 +191,20 @@ namespace SmartLife.Tests
         }
 
         [Test]
+        public void NoteGuardianActivity_ResetsIdleTimer()
+        {
+            Unlock();
+            _clock = 50f;
+            _menu.NoteGuardianActivity();
+            _clock = 100f;
+            _menu.Tick();
+            Assert.IsTrue(_menu.Unlocked, "50 s since the voice command.");
+            _clock = 111f;
+            _menu.Tick();
+            Assert.IsFalse(_menu.Unlocked);
+        }
+
+        [Test]
         public void Background_Relocks()
         {
             Unlock();

@@ -60,11 +60,15 @@ namespace SmartLife.Voice
             return GuardianUnlocked && Enabled && confidence >= MinConfidence && TryParse(phrase, out cmd);
         }
 
+        /// <summary>Raised after an accepted phrase has been applied.</summary>
+        public event System.Action<OverrideCommand> CommandAccepted;
+
         private void HandlePhrase(string phrase, float confidence)
         {
             if (!Accepts(phrase, confidence, out var cmd)) return;
             stateMachine.Apply(cmd);
             telemetry.IssueOverride(cmd, "voice");
+            CommandAccepted?.Invoke(cmd);
         }
 
         private void OnDestroy()
